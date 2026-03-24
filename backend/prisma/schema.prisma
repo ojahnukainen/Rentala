@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  MEMBER
+  ADMIN
+}
+
+enum GearStatus {
+  AVAILABLE
+  RENTED
+  MAINTENANCE
+  LOST
+}
+
+enum ItemStatus {
+  ACTIVE
+  RETURNED
+  OVERDUE
+  LOST
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  role      Role     @default(MEMBER)
+  loans     Loan[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Gear {
+  id           String     @id @default(uuid())
+  name         String
+  serialNumber String     @unique
+  category     String
+  status       GearStatus @default(AVAILABLE)
+  loanItems    LoanItem[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([category])
+}
+
+model Loan {
+  id         String     @id @default(uuid())
+  userId     String
+  borrowedAt DateTime   @default(now())
+  dueDate    DateTime
+  user       User       @relation(fields: [userId], references: [id])
+  items      LoanItem[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model LoanItem {
+  id         String     @id @default(uuid())
+  loanId     String
+  gearId     String
+  returnedAt DateTime?
+  status     ItemStatus @default(ACTIVE)
+  loan       Loan       @relation(fields: [loanId], references: [id])
+  gear       Gear       @relation(fields: [gearId], references: [id])
+
+  @@index([loanId])
+  @@index([gearId])
+  @@index([status])
+}
