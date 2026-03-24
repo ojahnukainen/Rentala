@@ -45,9 +45,8 @@ describe("errorHandler middleware", () => {
     const app = buildApp(new Error("database exploded"));
     const res = await request(app).get("/test");
     expect(res.status).toBe(500);
-    expect(res.body).toEqual({
-      error: { name: "InternalServerError", message: "An unexpected error occurred"},
-    });
+    expect(res.body.error.name).toBe("InternalServerError");
+    expect(res.body.error.message).toBe("An unexpected error occurred");
   });
 
   it("does not leak internal error details for unknown errors", async () => {

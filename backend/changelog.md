@@ -27,3 +27,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `src/gear/gear.controller.ts` — `GearController`: thin handlers delegating to `GearService`
 - `src/gear/gear.routes.ts` — `GET /gear`, `GET /gear/:id`, `POST /gear` (with Zod validation)
 - Mounted gear router at `/gear` in `src/index.ts`
+- `src/user/user.schema.ts` — Zod schema `CreateUserSchema` (email, name, role enum MEMBER|ADMIN — all required)
+- `src/user/user.service.ts` — `UserService`: `listUsers`, `getUserById` (throws `NotFoundError`), `createUser` (catches P2002 and throws `ConflictError`)
+- `src/user/user.controller.ts` — `UserController`: thin handlers delegating to `UserService`
+- `src/user/user.routes.ts` — `GET /users`, `GET /users/:id`, `POST /users` (with Zod validation)
+- Mounted user router at `/users` in `src/index.ts`

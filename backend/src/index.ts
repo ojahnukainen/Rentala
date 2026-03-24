@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import { errorHandler } from "./middleware/errorHandler";
 import { gearRouter } from "./gear/gear.routes";
+import { userRouter } from "./user/user.routes";
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.get("/ping", (_req, res) => {
 });
 
 app.use("/gear", gearRouter);
+app.use("/users", userRouter);
 
 app.use(errorHandler);
 
