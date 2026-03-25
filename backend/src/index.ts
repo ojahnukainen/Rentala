@@ -1,5 +1,7 @@
 import "dotenv/config";
 import express from "express";
+import swaggerUi from "swagger-ui-express";
+import { openApiDocument } from "./openapi/document";
 import { errorHandler } from "./middleware/errorHandler";
 import { gearRouter } from "./gear/gear.routes";
 import { userRouter } from "./user/user.routes";
@@ -12,6 +14,8 @@ app.use(express.json());
 app.get("/ping", (_req, res) => {
   res.json({ status: "ok" });
 });
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openApiDocument));
 
 app.use("/api/v1/gear", gearRouter);
 app.use("/api/v1/users", userRouter);
