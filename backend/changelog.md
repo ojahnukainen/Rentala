@@ -40,3 +40,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `ProcessReturnSchema` added to `loan.schema.ts` — validates `loanItemIds` array (min 1)
 - `LoanService.processReturn` — fetches items by ID, throws `NotFoundError` for missing IDs, throws `ConflictError` for already-returned items, then wraps `loanItem.updateMany` (status → RETURNED, sets `returnedAt`) + `gear.updateMany` (status → AVAILABLE) in a single `$transaction`; supports partial and full returns
 - `POST /loans/returns` route with Zod validation added to loan router
+- All API routes moved under `/api/v1` prefix (`/api/v1/gear`, `/api/v1/users`, `/api/v1/loans`); `GET /ping` remains at root for health checks

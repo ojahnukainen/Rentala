@@ -13,9 +13,9 @@ app.get("/ping", (_req, res) => {
   res.json({ status: "ok" });
 });
 
-app.use("/gear", gearRouter);
-app.use("/users", userRouter);
-app.use("/loans", loanRouter);
+app.use("/api/v1/gear", gearRouter);
+app.use("/api/v1/users", userRouter);
+app.use("/api/v1/loans", loanRouter);
 
 app.use(errorHandler);
 
