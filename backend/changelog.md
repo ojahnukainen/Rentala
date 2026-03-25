@@ -32,3 +32,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `src/user/user.controller.ts` — `UserController`: thin handlers delegating to `UserService`
 - `src/user/user.routes.ts` — `GET /users`, `GET /users/:id`, `POST /users` (with Zod validation)
 - Mounted user router at `/users` in `src/index.ts`
+- `src/loan/loan.schema.ts` — Zod schema `CreateLoanSchema` (userId, gearIds array min 1, dueDate coerced from string)
+- `src/loan/loan.service.ts` — `LoanService.createLoan`: validates empty gearIds and past dueDate, verifies all gear IDs exist, checks date-range overlaps via `LoanItem` (not gear status), creates Loan + LoanItems + updates Gear to RENTED inside a single `$transaction`
+- `src/loan/loan.controller.ts` — `LoanController`: thin handler delegating to `LoanService`
+- `src/loan/loan.routes.ts` — `POST /loans` with Zod validation
+- Mounted loan router at `/loans` in `src/index.ts`
+- `ProcessReturnSchema` added to `loan.schema.ts` — validates `loanItemIds` array (min 1)
+- `LoanService.processReturn` — fetches items by ID, throws `NotFoundError` for missing IDs, throws `ConflictError` for already-returned items, then wraps `loanItem.updateMany` (status → RETURNED, sets `returnedAt`) + `gear.updateMany` (status → AVAILABLE) in a single `$transaction`; supports partial and full returns
+- `POST /loans/returns` route with Zod validation added to loan router
