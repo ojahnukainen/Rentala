@@ -11,6 +11,8 @@ const mockUser: User = {
   email: "alice@cameraclub.fi",
   name: "Alice Virtanen",
   role: Role.MEMBER,
+  emailVerified: false,
+  image: null,
   createdAt: new Date(),
   updatedAt: new Date(),
 };
@@ -74,7 +76,9 @@ describe("UserService", () => {
 
       await UserService.createUser(input);
 
-      expect(prismaMock.user.create).toHaveBeenCalledWith({ data: input });
+      expect(prismaMock.user.create).toHaveBeenCalledWith({
+        data: { ...input, id: expect.any(String), emailVerified: false },
+      });
     });
 
     it("throws ConflictError when email already exists (P2002)", async () => {

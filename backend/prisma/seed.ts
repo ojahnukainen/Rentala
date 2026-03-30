@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient, Role, GearStatus } from "../src/generated/prisma/client";
 
@@ -9,22 +10,29 @@ async function main() {
   await prisma.loanItem.deleteMany();
   await prisma.loan.deleteMany();
   await prisma.gear.deleteMany();
+  await prisma.session.deleteMany();
+  await prisma.account.deleteMany();
+  await prisma.verification.deleteMany();
   await prisma.user.deleteMany();
 
   // Seed Users
   const alice = await prisma.user.create({
     data: {
+      id: "seed-user-alice",
       email: "alice@cameraclub.fi",
       name: "Alice Virtanen",
       role: Role.ADMIN,
+      emailVerified: true,
     },
   });
 
   const bob = await prisma.user.create({
     data: {
+      id: "seed-user-bob",
       email: "bob@cameraclub.fi",
       name: "Bob Mäkinen",
       role: Role.MEMBER,
+      emailVerified: true,
     },
   });
 

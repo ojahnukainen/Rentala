@@ -99,6 +99,92 @@ const responses409 = {
   },
 };
 
+// ── Auth routes ───────────────────────────────────────────────────────────────
+
+const AuthUserSchema = registry.register(
+  "AuthUser",
+  z
+    .object({
+      id: z.string().openapi({ example: "abc123" }),
+      email: z.string().openapi({ example: "alice@cameraclub.fi" }),
+      name: z.string().openapi({ example: "Alice Virtanen" }),
+      emailVerified: z.boolean(),
+      createdAt: z.string().datetime(),
+      updatedAt: z.string().datetime(),
+    })
+    .openapi("AuthUser")
+);
+
+const AuthResponseSchema = registry.register(
+  "AuthResponse",
+  z
+    .object({
+      token: z.string().openapi({ example: "eyJhbGci..." }),
+      user: AuthUserSchema,
+    })
+    .openapi("AuthResponse")
+);
+
+registry.registerPath({
+  method: "post",
+  path: "/api/auth/sign-up/email",
+  tags: ["Auth"],
+  summary: "Register a new user",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            email: z.string().openapi({ example: "alice@cameraclub.fi" }),
+            password: z.string().min(8).openapi({ example: "password123" }),
+            name: z.string().openapi({ example: "Alice Virtanen" }),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "Registration successful",
+      content: { "application/json": { schema: AuthResponseSchema } },
+    },
+    422: {
+      description: "Email already registered",
+      content: { "application/json": { schema: ErrorResponseSchema } },
+    },
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/auth/sign-in/email",
+  tags: ["Auth"],
+  summary: "Sign in with email and password",
+  description: "Returns user data and sets an HTTP-only `better-auth.session_token` cookie.",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            email: z.string().openapi({ example: "alice@cameraclub.fi" }),
+            password: z.string().openapi({ example: "password123" }),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "Login successful — session cookie is set",
+      content: { "application/json": { schema: AuthResponseSchema } },
+    },
+    401: {
+      description: "Invalid credentials",
+      content: { "application/json": { schema: ErrorResponseSchema } },
+    },
+  },
+});
+
 // ── Gear routes ───────────────────────────────────────────────────────────────
 
 registry.registerPath({

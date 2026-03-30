@@ -3,11 +3,15 @@ import express from "express";
 import swaggerUi from "swagger-ui-express";
 import { openApiDocument } from "./openapi/document";
 import { errorHandler } from "./middleware/errorHandler";
+import { authHandler } from "./auth/auth.routes";
 import { gearRouter } from "./gear/gear.routes";
 import { userRouter } from "./user/user.routes";
 import { loanRouter } from "./loan/loan.routes";
 
 const app = express();
+
+// Auth handler must come before express.json()
+app.all("/api/auth/*path", authHandler);
 
 app.use(express.json());
 

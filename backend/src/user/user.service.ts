@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import prisma from "../lib/prisma";
 import { User, Prisma } from "../generated/prisma/client";
 import { NotFoundError, ConflictError } from "../errors/AppError";
@@ -18,7 +19,7 @@ export const UserService = {
 
   async createUser(data: CreateUserInput): Promise<User> {
     try {
-      return await prisma.user.create({ data });
+      return await prisma.user.create({ data: { ...data, id: randomUUID(), emailVerified: false } });
     } catch (err) {
       if (
         err instanceof Prisma.PrismaClientKnownRequestError &&

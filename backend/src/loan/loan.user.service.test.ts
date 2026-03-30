@@ -25,6 +25,8 @@ const user1: User = {
   email: "alice@cameraclub.fi",
   name: "Alice Virtanen",
   role: Role.ADMIN,
+  emailVerified: true,
+  image: null,
   createdAt: now,
   updatedAt: now,
 };

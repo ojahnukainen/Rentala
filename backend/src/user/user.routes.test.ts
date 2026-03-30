@@ -18,6 +18,8 @@ const mockUser: User = {
   email: "alice@cameraclub.fi",
   name: "Alice Virtanen",
   role: Role.MEMBER,
+  emailVerified: false,
+  image: null,
   createdAt: new Date(),
   updatedAt: new Date(),
 };
