@@ -7,4 +7,5 @@ export const userRouter = Router();
 
 userRouter.get("/", UserController.listUsers);
 userRouter.get("/:id", UserController.getUserById);
+userRouter.get("/:id/loans", UserController.getLoansByUser);
 userRouter.post("/", validate(CreateUserSchema), UserController.createUser);

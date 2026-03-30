@@ -3,6 +3,7 @@ import { z } from "zod";
 export const CreateLoanSchema = z.object({
   userId: z.string().min(1),
   gearIds: z.array(z.string().min(1)).min(1, "At least one gear item is required"),
+  startDate: z.coerce.date(),
   dueDate: z.coerce.date(),
 });
 

@@ -12,6 +12,15 @@ export const LoanController = {
     }
   },
 
+  async pickupLoan(req: Request<{ id: string }>, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const loan = await LoanService.pickupLoan(req.params.id);
+      res.json(loan);
+    } catch (err) {
+      next(err);
+    }
+  },
+
   async processReturn(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { loanItemIds } = req.body as ProcessReturnInput;

@@ -52,7 +52,8 @@ model Gear {
 model Loan {
   id         String     @id @default(uuid())
   userId     String
-  borrowedAt DateTime   @default(now())
+  startDate  DateTime
+  borrowedAt DateTime?
   dueDate    DateTime
   user       User       @relation(fields: [userId], references: [id])
   items      LoanItem[]

@@ -42,8 +42,9 @@ const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 const mockLoan: Loan = {
   id: "loan-1",
   userId: "user-1",
-  borrowedAt: now,
-  dueDate: inOneWeek,
+  startDate: inOneWeek,
+  borrowedAt: null,
+  dueDate: inTwoWeeks,
   createdAt: now,
   updatedAt: now,
 };
@@ -77,13 +78,16 @@ describe("LoanService.createLoan", () => {
     it("fetches only the specific requested gear ID, not all gear", async () => {
       setupTransaction();
       setupNoOverlaps();
-      // DB has camera1 and camera2 — user requests only camera1
       prismaMock.gear.findMany.mockResolvedValue([camera1]);
       prismaMock.loan.create.mockResolvedValue(mockLoan);
       prismaMock.loanItem.createMany.mockResolvedValue({ count: 1 });
-      prismaMock.gear.updateMany.mockResolvedValue({ count: 1 });
 
-      await LoanService.createLoan({ userId: "user-1", gearIds: ["camera-1"], dueDate: inOneWeek });
+      await LoanService.createLoan({
+        userId: "user-1",
+        gearIds: ["camera-1"],
+        startDate: inOneWeek,
+        dueDate: inTwoWeeks,
+      });
 
       expect(prismaMock.gear.findMany).toHaveBeenCalledWith({
         where: { id: { in: ["camera-1"] } },
@@ -96,29 +100,34 @@ describe("LoanService.createLoan", () => {
       prismaMock.gear.findMany.mockResolvedValue([camera1]);
       prismaMock.loan.create.mockResolvedValue(mockLoan);
       prismaMock.loanItem.createMany.mockResolvedValue({ count: 1 });
-      prismaMock.gear.updateMany.mockResolvedValue({ count: 1 });
 
-      await LoanService.createLoan({ userId: "user-1", gearIds: ["camera-1"], dueDate: inOneWeek });
+      await LoanService.createLoan({
+        userId: "user-1",
+        gearIds: ["camera-1"],
+        startDate: inOneWeek,
+        dueDate: inTwoWeeks,
+      });
 
       expect(prismaMock.loanItem.createMany).toHaveBeenCalledWith({
         data: [{ loanId: mockLoan.id, gearId: "camera-1", status: ItemStatus.ACTIVE }],
       });
     });
 
-    it("updates only the requested gear's status to RENTED, not other available gear", async () => {
+    it("does NOT update gear status at booking time — gear stays AVAILABLE until pickup", async () => {
       setupTransaction();
       setupNoOverlaps();
       prismaMock.gear.findMany.mockResolvedValue([camera1]);
       prismaMock.loan.create.mockResolvedValue(mockLoan);
       prismaMock.loanItem.createMany.mockResolvedValue({ count: 1 });
-      prismaMock.gear.updateMany.mockResolvedValue({ count: 1 });
 
-      await LoanService.createLoan({ userId: "user-1", gearIds: ["camera-1"], dueDate: inOneWeek });
-
-      expect(prismaMock.gear.updateMany).toHaveBeenCalledWith({
-        where: { id: { in: ["camera-1"] } },
-        data: { status: GearStatus.RENTED },
+      await LoanService.createLoan({
+        userId: "user-1",
+        gearIds: ["camera-1"],
+        startDate: inOneWeek,
+        dueDate: inTwoWeeks,
       });
+
+      expect(prismaMock.gear.updateMany).not.toHaveBeenCalled();
     });
 
     it("returns the created loan", async () => {
@@ -127,28 +136,31 @@ describe("LoanService.createLoan", () => {
       prismaMock.gear.findMany.mockResolvedValue([camera1]);
       prismaMock.loan.create.mockResolvedValue(mockLoan);
       prismaMock.loanItem.createMany.mockResolvedValue({ count: 1 });
-      prismaMock.gear.updateMany.mockResolvedValue({ count: 1 });
 
       const result = await LoanService.createLoan({
         userId: "user-1",
         gearIds: ["camera-1"],
-        dueDate: inOneWeek,
+        startDate: inOneWeek,
+        dueDate: inTwoWeeks,
       });
 
       expect(result).toEqual(mockLoan);
     });
 
-    it("succeeds when gear is currently RENTED but existing loan ends before the new booking starts", async () => {
+    it("succeeds when gear is currently RENTED but existing loan ends before the new startDate", async () => {
       setupTransaction();
-      // Existing loan on camera-1 ends in 1 week, new booking starts in 2 weeks — no overlap
       prismaMock.loanItem.findMany.mockResolvedValue([]);
       prismaMock.gear.findMany.mockResolvedValue([{ ...camera1, status: GearStatus.RENTED }]);
-      prismaMock.loan.create.mockResolvedValue({ ...mockLoan, dueDate: inThreeWeeks });
+      prismaMock.loan.create.mockResolvedValue(mockLoan);
       prismaMock.loanItem.createMany.mockResolvedValue({ count: 1 });
-      prismaMock.gear.updateMany.mockResolvedValue({ count: 1 });
 
       await expect(
-        LoanService.createLoan({ userId: "user-1", gearIds: ["camera-1"], dueDate: inThreeWeeks })
+        LoanService.createLoan({
+          userId: "user-1",
+          gearIds: ["camera-1"],
+          startDate: inTwoWeeks,
+          dueDate: inThreeWeeks,
+        })
       ).resolves.toBeDefined();
     });
   });
@@ -159,16 +171,15 @@ describe("LoanService.createLoan", () => {
     it("fetches only the specific requested gear IDs, not all gear", async () => {
       setupTransaction();
       setupNoOverlaps();
-      // DB has camera1, camera2, lens1, lens2 — user requests only camera1 + lens1
       prismaMock.gear.findMany.mockResolvedValue([camera1, lens1]);
       prismaMock.loan.create.mockResolvedValue(mockLoan);
       prismaMock.loanItem.createMany.mockResolvedValue({ count: 2 });
-      prismaMock.gear.updateMany.mockResolvedValue({ count: 2 });
 
       await LoanService.createLoan({
         userId: "user-1",
         gearIds: ["camera-1", "lens-1"],
-        dueDate: inOneWeek,
+        startDate: inOneWeek,
+        dueDate: inTwoWeeks,
       });
 
       expect(prismaMock.gear.findMany).toHaveBeenCalledWith({
@@ -182,12 +193,12 @@ describe("LoanService.createLoan", () => {
       prismaMock.gear.findMany.mockResolvedValue([camera1, lens1]);
       prismaMock.loan.create.mockResolvedValue(mockLoan);
       prismaMock.loanItem.createMany.mockResolvedValue({ count: 2 });
-      prismaMock.gear.updateMany.mockResolvedValue({ count: 2 });
 
       await LoanService.createLoan({
         userId: "user-1",
         gearIds: ["camera-1", "lens-1"],
-        dueDate: inOneWeek,
+        startDate: inOneWeek,
+        dueDate: inTwoWeeks,
       });
 
       expect(prismaMock.loanItem.createMany).toHaveBeenCalledWith({
@@ -198,29 +209,25 @@ describe("LoanService.createLoan", () => {
       });
     });
 
-    it("updates only the requested gear IDs to RENTED, leaving camera2 and lens2 untouched", async () => {
+    it("does NOT update gear status at booking time for any of the items", async () => {
       setupTransaction();
       setupNoOverlaps();
       prismaMock.gear.findMany.mockResolvedValue([camera1, lens1]);
       prismaMock.loan.create.mockResolvedValue(mockLoan);
       prismaMock.loanItem.createMany.mockResolvedValue({ count: 2 });
-      prismaMock.gear.updateMany.mockResolvedValue({ count: 2 });
 
       await LoanService.createLoan({
         userId: "user-1",
         gearIds: ["camera-1", "lens-1"],
-        dueDate: inOneWeek,
+        startDate: inOneWeek,
+        dueDate: inTwoWeeks,
       });
 
-      expect(prismaMock.gear.updateMany).toHaveBeenCalledWith({
-        where: { id: { in: ["camera-1", "lens-1"] } },
-        data: { status: GearStatus.RENTED },
-      });
+      expect(prismaMock.gear.updateMany).not.toHaveBeenCalled();
     });
 
     it("throws ConflictError when one of the requested items has an overlapping booking", async () => {
       setupTransaction();
-      // camera1 has a conflicting booking, lens1 is free
       prismaMock.loanItem.findMany.mockResolvedValue([conflictingLoanItem]);
       prismaMock.gear.findMany.mockResolvedValue([camera1, lens1]);
 
@@ -228,14 +235,14 @@ describe("LoanService.createLoan", () => {
         LoanService.createLoan({
           userId: "user-1",
           gearIds: ["camera-1", "lens-1"],
-          dueDate: inOneWeek,
+          startDate: inOneWeek,
+          dueDate: inTwoWeeks,
         })
       ).rejects.toThrow(ConflictError);
     });
 
-    it("succeeds when one item is RENTED but its loan ends before the new booking period", async () => {
+    it("succeeds when one item is RENTED but its loan ends before the new startDate", async () => {
       setupTransaction();
-      // lens1 is currently RENTED but no date overlap with new booking
       prismaMock.loanItem.findMany.mockResolvedValue([]);
       prismaMock.gear.findMany.mockResolvedValue([
         camera1,
@@ -243,13 +250,13 @@ describe("LoanService.createLoan", () => {
       ]);
       prismaMock.loan.create.mockResolvedValue(mockLoan);
       prismaMock.loanItem.createMany.mockResolvedValue({ count: 2 });
-      prismaMock.gear.updateMany.mockResolvedValue({ count: 2 });
 
       await expect(
         LoanService.createLoan({
           userId: "user-1",
           gearIds: ["camera-1", "lens-1"],
-          dueDate: inTwoWeeks,
+          startDate: inTwoWeeks,
+          dueDate: inThreeWeeks,
         })
       ).resolves.toBeDefined();
     });
@@ -260,13 +267,34 @@ describe("LoanService.createLoan", () => {
   describe("validation", () => {
     it("throws ValidationError when gearIds array is empty", async () => {
       await expect(
-        LoanService.createLoan({ userId: "user-1", gearIds: [], dueDate: inOneWeek })
+        LoanService.createLoan({
+          userId: "user-1",
+          gearIds: [],
+          startDate: inOneWeek,
+          dueDate: inTwoWeeks,
+        })
       ).rejects.toThrow(ValidationError);
     });
 
-    it("throws ValidationError when dueDate is in the past", async () => {
+    it("throws ValidationError when startDate is in the past", async () => {
       await expect(
-        LoanService.createLoan({ userId: "user-1", gearIds: ["camera-1"], dueDate: yesterday })
+        LoanService.createLoan({
+          userId: "user-1",
+          gearIds: ["camera-1"],
+          startDate: yesterday,
+          dueDate: inOneWeek,
+        })
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it("throws ValidationError when dueDate is not after startDate", async () => {
+      await expect(
+        LoanService.createLoan({
+          userId: "user-1",
+          gearIds: ["camera-1"],
+          startDate: inTwoWeeks,
+          dueDate: inOneWeek,
+        })
       ).rejects.toThrow(ValidationError);
     });
   });
@@ -279,12 +307,16 @@ describe("LoanService.createLoan", () => {
       prismaMock.loanItem.findMany.mockResolvedValue([conflictingLoanItem]);
 
       await expect(
-        LoanService.createLoan({ userId: "user-1", gearIds: ["camera-1"], dueDate: inOneWeek })
+        LoanService.createLoan({
+          userId: "user-1",
+          gearIds: ["camera-1"],
+          startDate: inOneWeek,
+          dueDate: inTwoWeeks,
+        })
       ).rejects.toThrow(ConflictError);
     });
 
     it("throws NotFoundError when a requested gear ID does not exist in the database", async () => {
-      // findMany returns only camera1 but nonexistent-id was also requested
       prismaMock.gear.findMany.mockResolvedValue([camera1]);
       prismaMock.loanItem.findMany.mockResolvedValue([]);
 
@@ -292,7 +324,8 @@ describe("LoanService.createLoan", () => {
         LoanService.createLoan({
           userId: "user-1",
           gearIds: ["camera-1", "nonexistent-id"],
-          dueDate: inOneWeek,
+          startDate: inOneWeek,
+          dueDate: inTwoWeeks,
         })
       ).rejects.toThrow(NotFoundError);
     });

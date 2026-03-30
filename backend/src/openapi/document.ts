@@ -60,7 +60,8 @@ const LoanResponseSchema = registry.register(
     .object({
       id: z.string().openapi({ example: "a1b2c3d4-..." }),
       userId: z.string().openapi({ example: "a1b2c3d4-..." }),
-      borrowedAt: z.string().datetime(),
+      startDate: z.string().datetime().openapi({ description: "Booking period start" }),
+      borrowedAt: z.string().datetime().nullable().openapi({ description: "Actual pickup timestamp; null until picked up" }),
       dueDate: z.string().datetime(),
       createdAt: z.string().datetime(),
       updatedAt: z.string().datetime(),
@@ -186,6 +187,25 @@ registry.registerPath({
 });
 
 registry.registerPath({
+  method: "get",
+  path: "/api/v1/users/{id}/loans",
+  tags: ["Users", "Loans"],
+  summary: "Get all loans for a specific user",
+  request: {
+    params: z.object({ id: z.string() }),
+  },
+  responses: {
+    200: {
+      description: "Array of loans with items and gear details",
+      content: {
+        "application/json": { schema: z.array(LoanResponseSchema) },
+      },
+    },
+    ...responses404,
+  },
+});
+
+registry.registerPath({
   method: "post",
   path: "/api/v1/users",
   tags: ["Users"],
@@ -225,6 +245,26 @@ registry.registerPath({
       content: { "application/json": { schema: LoanResponseSchema } },
     },
     ...responses400,
+    ...responses404,
+    ...responses409,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/v1/loans/{id}/pickup",
+  tags: ["Loans"],
+  summary: "Pick up a loan (mark as borrowed)",
+  description:
+    "Sets borrowedAt to the current timestamp and updates all gear items in the loan to RENTED status. Fails if the loan is already picked up.",
+  request: {
+    params: z.object({ id: z.string() }),
+  },
+  responses: {
+    200: {
+      description: "Updated loan with borrowedAt set",
+      content: { "application/json": { schema: LoanResponseSchema } },
+    },
     ...responses404,
     ...responses409,
   },
