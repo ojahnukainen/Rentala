@@ -59,3 +59,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `prisma/seed.ts` updated: clears `Session`, `Account`, `Verification` tables before seeding; seed users now include `emailVerified: true` and explicit `id` fields; imports `dotenv/config`
 - `UserService.createUser` updated to generate a UUID via `crypto.randomUUID()` and set `emailVerified: false` for API-created users
 - OpenAPI document updated: Auth tag with `POST /api/auth/sign-up/email` and `POST /api/auth/sign-in/email` documented; Loan response schema updated with `startDate` and nullable `borrowedAt`; pickup route and user loans route documented
+- `src/middleware/requireAuth.ts` — async Express middleware that calls `auth.api.getSession` via `fromNodeHeaders`; attaches `session.user` to `req.user` on success; forwards a 401 `AppError` to the error handler when the session is missing or invalid
+- `src/types/express.d.ts` — declaration merging to extend Express `Request` with `user?: User` (Prisma generated type)
