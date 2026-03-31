@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express from "express";
+import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import { openApiDocument } from "./openapi/document";
 import { errorHandler } from "./middleware/errorHandler";
@@ -9,6 +10,11 @@ import { userRouter } from "./user/user.routes";
 import { loanRouter } from "./loan/loan.routes";
 
 const app = express();
+
+app.use(cors({
+  origin: ["http://localhost:3000", "http://localhost:5173"],
+  credentials: true,
+}));
 
 // Auth handler must come before express.json()
 app.all("/api/auth/*path", authHandler);
