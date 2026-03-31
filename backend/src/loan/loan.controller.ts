@@ -5,7 +5,7 @@ import { CreateLoanInput, ProcessReturnInput } from "./loan.schema";
 export const LoanController = {
   async createLoan(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const loan = await LoanService.createLoan(req.body as CreateLoanInput);
+      const loan = await LoanService.createLoan({ ...req.body as CreateLoanInput, userId: req.user!.id });
       res.status(201).json(loan);
     } catch (err) {
       next(err);

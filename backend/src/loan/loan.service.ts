@@ -3,12 +3,14 @@ import { Loan, LoanItem, Gear, ItemStatus, GearStatus } from "../generated/prism
 import { ValidationError, ConflictError, NotFoundError } from "../errors/AppError";
 import { CreateLoanInput } from "./loan.schema";
 
+// userId comes from the authenticated session, not the request body
+type CreateLoanServiceInput = CreateLoanInput & { userId: string };
 type LoanWithItems = Loan & { items: LoanItem[] };
 type LoanWithItemsAndGear = Loan & { items: (LoanItem & { gear: Gear })[] };
 type ReturnResult = { count: number };
 
 export const LoanService = {
-  async createLoan(data: CreateLoanInput): Promise<Loan> {
+  async createLoan(data: CreateLoanServiceInput): Promise<Loan> {
     const { userId, gearIds, startDate, dueDate } = data;
 
     if (gearIds.length === 0) {
