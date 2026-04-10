@@ -1,0 +1,15 @@
+{
+  "name": "rentala_project",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend",
+    "shared"
+  ],
+  "scripts": {
+    "dev:backend": "npm run dev --workspace=backend",
+    "test:backend": "npm run test --workspace=backend",
+    "build:backend": "npm run build --workspace=backend"
+  }
+}
