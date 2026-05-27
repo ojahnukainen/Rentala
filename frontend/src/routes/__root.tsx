@@ -1,8 +1,16 @@
+import { useEffect } from 'react'
 import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
+import { useAuthStore } from '../store/useAuthStore'
 
-export const Route = createRootRoute({
-  component: () => (
+function RootLayout() {
+  const fetchSession = useAuthStore((s) => s.fetchSession)
+
+  useEffect(() => {
+    fetchSession()
+  }, [fetchSession])
+
+  return (
     <>
       <nav style={{ display: 'flex', gap: '1rem', padding: '1rem', borderBottom: '1px solid #ccc' }}>
         <Link to="/dashboard" activeProps={{ style: { fontWeight: 'bold' } }}>Dashboard</Link>
@@ -13,5 +21,9 @@ export const Route = createRootRoute({
       <Outlet />
       <TanStackRouterDevtools />
     </>
-  ),
+  )
+}
+
+export const Route = createRootRoute({
+  component: RootLayout,
 })

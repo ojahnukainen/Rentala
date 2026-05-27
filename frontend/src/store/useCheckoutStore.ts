@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { defaultPickup, defaultReturn } from '../lib/dates'
 
 export interface CheckoutItem {
   id: string
@@ -18,17 +19,6 @@ interface CheckoutStore {
   clear: () => void
 }
 
-function defaultPickup() {
-  const d = new Date()
-  d.setHours(0, 0, 0, 0)
-  return d
-}
-
-function defaultReturn() {
-  const d = defaultPickup()
-  d.setDate(d.getDate() + 2)
-  return d
-}
 
 export const useCheckoutStore = create<CheckoutStore>((set, get) => ({
   items: [],

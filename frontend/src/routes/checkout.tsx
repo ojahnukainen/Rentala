@@ -1,24 +1,61 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
+import { createFileRoute, useNavigate, redirect } from '@tanstack/react-router'
 import { useCheckoutStore } from '../store/useCheckoutStore'
+import { useAuthStore } from '../store/useAuthStore'
+import { api, ApiError } from '../lib/api'
 import DatepickerComponent from '../components/DatepickerComponent'
 import GearListItem from '../components/GearListItem'
 import styles from './checkout.module.css'
 
 export const Route = createFileRoute('/checkout')({
+  beforeLoad: () => {
+    const { user, loading } = useAuthStore.getState()
+    if (!loading && !user) {
+      throw redirect({ to: '/login', search: { redirect: '/checkout' } })
+    }
+  },
   component: CheckoutPage,
 })
 
 function CheckoutPage() {
-  const { items, pickupDate, returnDate, removeItem } = useCheckoutStore()
+  const { items, pickupDate, returnDate, removeItem, clear } = useCheckoutStore()
+  const { user, loading: authLoading } = useAuthStore()
   const navigate = useNavigate()
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
-  // Group items by category
+  // Guard for the case where auth finishes loading and user is still null
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate({ to: '/login', search: { redirect: '/checkout' } })
+    }
+  }, [authLoading, user, navigate])
+
   const grouped = items.reduce<Record<string, typeof items>>((acc, item) => {
-    const key = item.category
-    if (!acc[key]) acc[key] = []
-    acc[key].push(item)
+    if (!acc[item.category]) acc[item.category] = []
+    acc[item.category].push(item)
     return acc
   }, {})
+
+  async function handleCheckout() {
+    setSubmitError(null)
+    setSubmitting(true)
+    try {
+      await api.post('/api/v1/loans', {
+        gearIds: items.map((i) => i.id),
+        startDate: pickupDate,
+        dueDate: returnDate,
+      })
+      clear()
+      navigate({ to: '/booking-result', search: { status: 'confirmed' } })
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : 'Something went wrong. Please try again.'
+      setSubmitError(message)
+      navigate({ to: '/booking-result', search: { status: 'denied' } })
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   return (
     <div className={styles.page}>
@@ -29,18 +66,23 @@ function CheckoutPage() {
 
       <div className={styles.summarySection}>
         <p className={styles.sectionLabel}>Summary for the booking</p>
-        <DatepickerComponent
-          pickupDate={pickupDate}
-          returnDate={returnDate}
-          readOnly
-        />
+        <DatepickerComponent pickupDate={pickupDate} returnDate={returnDate} readOnly />
       </div>
 
       <div className={styles.gearSection}>
         <p className={styles.sectionLabel}>Selected gear</p>
 
         {items.length === 0 ? (
-          <p className={styles.empty}>No items selected. <button type="button" onClick={() => navigate({ to: '/gear' })} style={{ background: 'none', border: 'none', color: '#416900', fontWeight: 700, cursor: 'pointer', padding: 0 }}>Go back to gear</button></p>
+          <p className={styles.empty}>
+            No items selected.{' '}
+            <button
+              type="button"
+              onClick={() => navigate({ to: '/gear' })}
+              style={{ background: 'none', border: 'none', color: '#416900', fontWeight: 700, cursor: 'pointer', padding: 0 }}
+            >
+              Go back to gear
+            </button>
+          </p>
         ) : (
           Object.entries(grouped).map(([category, categoryItems]) => (
             <div key={category} className={styles.categorySection}>
@@ -59,6 +101,8 @@ function CheckoutPage() {
             </div>
           ))
         )}
+
+        {submitError && <p className={styles.error}>{submitError}</p>}
       </div>
 
       {items.length > 0 && (
@@ -66,9 +110,10 @@ function CheckoutPage() {
           <button
             type="button"
             className={styles.checkoutBtn}
-            onClick={() => navigate({ to: '/booking-result', search: { status: 'confirmed' } })}
+            onClick={handleCheckout}
+            disabled={submitting}
           >
-            Checkout
+            {submitting ? 'Booking…' : 'Checkout'}
           </button>
         </div>
       )}
