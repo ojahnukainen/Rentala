@@ -6,7 +6,8 @@ type QuickSelect = '2days' | '1week' | 'custom'
 interface DatepickerComponentProps {
   pickupDate: Date
   returnDate: Date
-  onDatesChange: (pickup: Date, returnDate: Date) => void
+  readOnly?: boolean
+  onDatesChange?: (pickup: Date, returnDate: Date) => void
 }
 
 function CalendarIcon() {
@@ -33,6 +34,7 @@ function formatDate(date: Date) {
 export default function DatepickerComponent({
   pickupDate,
   returnDate,
+  readOnly = false,
   onDatesChange,
 }: DatepickerComponentProps) {
   const [active, setActive] = useState<QuickSelect | null>(null)
@@ -44,67 +46,68 @@ export default function DatepickerComponent({
     if (preset === '2days') {
       const ret = new Date(pickup)
       ret.setDate(ret.getDate() + 2)
-      onDatesChange(pickup, ret)
+      onDatesChange?.(pickup, ret)
     } else if (preset === '1week') {
       const ret = new Date(pickup)
       ret.setDate(ret.getDate() + 7)
-      onDatesChange(pickup, ret)
+      onDatesChange?.(pickup, ret)
     } else {
-      // custom — keep current dates
-      onDatesChange(pickupDate, returnDate)
+      onDatesChange?.(pickupDate, returnDate)
     }
   }
 
   return (
     <div className={styles.wrapper}>
-      <span className={styles.label}>Date for the rent</span>
+      {!readOnly && <span className={styles.label}>Date for the rent</span>}
       <div className={styles.card}>
         <div className={styles.dateFields}>
-          <label className={styles.dateInput}>
+          <div className={styles.dateInput}>
             <CalendarIcon />
             <div className={styles.dateInputContent}>
               <span className={styles.dateInputHeader}>Pickup Date</span>
               <span className={styles.dateInputValue}>{formatDate(pickupDate)}</span>
             </div>
-            <input type="date" hidden readOnly value={pickupDate.toISOString().slice(0, 10)} />
-          </label>
-          <label className={styles.dateInput}>
+          </div>
+          <div className={styles.dateInput}>
             <CalendarIcon />
             <div className={styles.dateInputContent}>
               <span className={styles.dateInputHeader}>Return Date</span>
               <span className={styles.dateInputValue}>{formatDate(returnDate)}</span>
             </div>
-            <input type="date" hidden readOnly value={returnDate.toISOString().slice(0, 10)} />
-          </label>
+          </div>
         </div>
 
-        <div className={styles.quickSelect}>
-          <button
-            type="button"
-            className={`${styles.quickBtn} ${active === '2days' ? styles.quickBtnActive : ''}`}
-            onClick={() => applyQuickSelect('2days')}
-          >
-            2 DAYS
-          </button>
-          <button
-            type="button"
-            className={`${styles.quickBtn} ${active === '1week' ? styles.quickBtnActive : ''}`}
-            onClick={() => applyQuickSelect('1week')}
-          >
-            1 WEEK
-          </button>
-          <button
-            type="button"
-            className={`${styles.quickBtn} ${active === 'custom' ? styles.quickBtnActive : ''}`}
-            onClick={() => applyQuickSelect('custom')}
-          >
-            CUSTOM
-          </button>
-        </div>
+        {!readOnly && (
+          <>
+            <div className={styles.quickSelect}>
+              <button
+                type="button"
+                className={`${styles.quickBtn} ${active === '2days' ? styles.quickBtnActive : ''}`}
+                onClick={() => applyQuickSelect('2days')}
+              >
+                2 DAYS
+              </button>
+              <button
+                type="button"
+                className={`${styles.quickBtn} ${active === '1week' ? styles.quickBtnActive : ''}`}
+                onClick={() => applyQuickSelect('1week')}
+              >
+                1 WEEK
+              </button>
+              <button
+                type="button"
+                className={`${styles.quickBtn} ${active === 'custom' ? styles.quickBtnActive : ''}`}
+                onClick={() => applyQuickSelect('custom')}
+              >
+                CUSTOM
+              </button>
+            </div>
 
-        <button type="button" className={styles.submitBtn}>
-          Update Dates
-        </button>
+            <button type="button" className={styles.submitBtn}>
+              Update Dates
+            </button>
+          </>
+        )}
       </div>
     </div>
   )

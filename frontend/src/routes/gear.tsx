@@ -11,10 +11,10 @@ export const Route = createFileRoute('/gear')({
 
 // Placeholder data — will be replaced with API calls
 const CAMERAS = [
-  { id: '1', name: 'R6 #1', brand: 'Canon' },
-  { id: '2', name: 'R6 #2', brand: 'Canon' },
-  { id: '3', name: 'R #1', brand: 'Canon' },
-  { id: '4', name: 'R7 #1', brand: 'Canon' },
+  { id: '1', name: 'R6 #1', brand: 'Canon', category: 'Cameras' },
+  { id: '2', name: 'R6 #2', brand: 'Canon', category: 'Cameras' },
+  { id: '3', name: 'R #1', brand: 'Canon', category: 'Cameras' },
+  { id: '4', name: 'R7 #1', brand: 'Canon', category: 'Cameras' },
 ]
 
 function defaultPickup() {
@@ -32,12 +32,13 @@ function defaultReturn() {
 function GearListPage() {
   const [pickupDate, setPickupDate] = useState(defaultPickup)
   const [returnDate, setReturnDate] = useState(defaultReturn)
-  const { items, addItem, removeItem, hasItem } = useCheckoutStore()
+  const { items, addItem, removeItem, hasItem, setDates } = useCheckoutStore()
   const navigate = useNavigate()
 
   function handleDatesChange(pickup: Date, ret: Date) {
     setPickupDate(pickup)
     setReturnDate(ret)
+    setDates(pickup, ret)
   }
 
   function handleCheckout() {
@@ -74,7 +75,7 @@ function GearListPage() {
                 brand={item.brand}
                 added={hasItem(item.id)}
                 onInfo={() => console.log('info', item.id)}
-                onAdd={() => addItem(item)}
+                onAdd={() => addItem({ id: item.id, name: item.name, brand: item.brand, category: item.category })}
                 onRemove={() => removeItem(item.id)}
               />
             ))}
