@@ -1,0 +1,122 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  width: 100%;
+}
+
+.label {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: #181d12;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid rgba(193, 202, 176, 0.1);
+  border-radius: 12px;
+  padding: 17px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.dateFields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dateInput {
+  background: #f1f6e3;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.dateInput:hover {
+  background: #e8efd6;
+}
+
+.calendarIcon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 20px;
+  color: #416900;
+}
+
+.dateInputContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.dateInputHeader {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  line-height: 15px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #414a36;
+}
+
+.dateInputValue {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  color: #181d12;
+}
+
+.quickSelect {
+  display: flex;
+  gap: 8px;
+  padding: 0 8px;
+}
+
+.quickBtn {
+  background: #e6ead7;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 16px;
+  color: #181d12;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.quickBtn:hover,
+.quickBtnActive {
+  background: #d8ddc8;
+}
+
+.submitBtn {
+  position: relative;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 32px;
+  background: linear-gradient(135deg, #416900 100%, #0052ff 100%);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 24px;
+  color: #ffffff;
+  cursor: pointer;
+  width: 100%;
+  box-shadow: 0px 10px 15px -3px rgba(65, 105, 0, 0.2), 0px 4px 6px -4px rgba(65, 105, 0, 0.2);
+}
+
+.submitBtn:hover {
+  background: linear-gradient(135deg, #335300 100%, #0052ff 100%);
+}

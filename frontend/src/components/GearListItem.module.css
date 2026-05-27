@@ -1,0 +1,118 @@
+.item {
+  background: #ffffff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 66px;
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+.iconBg {
+  background: #f1f6e3;
+  border-radius: 4px;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconBg svg {
+  width: 20px;
+  height: 16px;
+  color: #416900;
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.name {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 20px;
+  color: #171c1f;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.brand {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
+  color: #434656;
+}
+
+.buttonGroup {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.btnInfo {
+  background: #e6ead7;
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 16px;
+  color: #181d12;
+  cursor: pointer;
+}
+
+.btnInfo:hover {
+  background: #d8ddc8;
+}
+
+.btnAdd {
+  position: relative;
+  border: none;
+  border-radius: 8px;
+  padding: 0 16px;
+  height: 32px;
+  background: linear-gradient(106deg, #416900 100%, #0052ff 100%);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 24px;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0px 10px 15px -3px rgba(65, 105, 0, 0.2), 0px 4px 6px -4px rgba(65, 105, 0, 0.2);
+}
+
+.btnAdd:hover {
+  background: linear-gradient(106deg, #335300 100%, #0052ff 100%);
+}
+
+.btnRemove {
+  position: relative;
+  border: none;
+  border-radius: 8px;
+  padding: 0 16px;
+  height: 32px;
+  background: #690000;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 24px;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0px 10px 15px -3px rgba(105, 0, 0, 0.2), 0px 4px 6px -4px rgba(105, 0, 0, 0.2);
+}
+
+.btnRemove:hover {
+  background: #520000;
+}
