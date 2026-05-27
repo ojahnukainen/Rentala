@@ -63,7 +63,11 @@ function CheckoutPage() {
 
       {items.length > 0 && (
         <div className={styles.checkoutBar}>
-          <button type="button" className={styles.checkoutBtn}>
+          <button
+            type="button"
+            className={styles.checkoutBtn}
+            onClick={() => navigate({ to: '/booking-result', search: { status: 'confirmed' } })}
+          >
             Checkout
           </button>
         </div>

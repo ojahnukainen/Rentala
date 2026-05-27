@@ -13,6 +13,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as GearRouteImport } from './routes/gear'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as BookingResultRouteImport } from './routes/booking-result'
 import { Route as IndexRouteImport } from './routes/index'
 
 const LoginRoute = LoginRouteImport.update({
@@ -35,6 +36,11 @@ const CheckoutRoute = CheckoutRouteImport.update({
   path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BookingResultRoute = BookingResultRouteImport.update({
+  id: '/booking-result',
+  path: '/booking-result',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -43,6 +49,7 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/booking-result': typeof BookingResultRoute
   '/checkout': typeof CheckoutRoute
   '/dashboard': typeof DashboardRoute
   '/gear': typeof GearRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/booking-result': typeof BookingResultRoute
   '/checkout': typeof CheckoutRoute
   '/dashboard': typeof DashboardRoute
   '/gear': typeof GearRoute
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/booking-result': typeof BookingResultRoute
   '/checkout': typeof CheckoutRoute
   '/dashboard': typeof DashboardRoute
   '/gear': typeof GearRoute
@@ -65,14 +74,28 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/checkout' | '/dashboard' | '/gear' | '/login'
+  fullPaths:
+    | '/'
+    | '/booking-result'
+    | '/checkout'
+    | '/dashboard'
+    | '/gear'
+    | '/login'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/checkout' | '/dashboard' | '/gear' | '/login'
-  id: '__root__' | '/' | '/checkout' | '/dashboard' | '/gear' | '/login'
+  to: '/' | '/booking-result' | '/checkout' | '/dashboard' | '/gear' | '/login'
+  id:
+    | '__root__'
+    | '/'
+    | '/booking-result'
+    | '/checkout'
+    | '/dashboard'
+    | '/gear'
+    | '/login'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BookingResultRoute: typeof BookingResultRoute
   CheckoutRoute: typeof CheckoutRoute
   DashboardRoute: typeof DashboardRoute
   GearRoute: typeof GearRoute
@@ -109,6 +132,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/booking-result': {
+      id: '/booking-result'
+      path: '/booking-result'
+      fullPath: '/booking-result'
+      preLoaderRoute: typeof BookingResultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -121,6 +151,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BookingResultRoute: BookingResultRoute,
   CheckoutRoute: CheckoutRoute,
   DashboardRoute: DashboardRoute,
   GearRoute: GearRoute,
