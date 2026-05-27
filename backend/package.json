@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node src/index.ts",
+    "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "test": "vitest"
@@ -17,10 +17,10 @@
     "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
-    "@rentala_project/shared": "*",
     "@asteasolutions/zod-to-openapi": "^8.4.3",
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "^7.5.0",
+    "@rentala_project/shared": "*",
     "better-auth": "^1.5.6",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
@@ -38,6 +38,7 @@
     "prisma": "^7.5.0",
     "supertest": "^7.2.2",
     "ts-node": "^10.9.2",
+    "tsx": "^4.22.3",
     "typescript": "^5.9.3",
     "vitest": "^4.1.0",
     "vitest-mock-extended": "^3.1.0"

@@ -319,10 +319,10 @@ registry.registerPath({
   tags: ["Loans"],
   summary: "Create a new loan (checkout)",
   description:
-    "Creates a loan for one or more gear items. Availability is checked by date-range overlap — a currently rented item can still be booked if its existing loan ends before the requested period.",
+    "Creates a loan for one or more gear items. userId is taken from the authenticated session. Availability is checked by date-range overlap — a currently rented item can still be booked if its existing loan ends before the requested period.",
   request: {
     body: {
-      content: { "application/json": { schema: CreateLoanSchema.openapi({ description: "userId is taken from the authenticated session" }) } },
+      content: { "application/json": { schema: CreateLoanSchema } },
     },
   },
   responses: {
