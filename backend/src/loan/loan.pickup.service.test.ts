@@ -60,7 +60,7 @@ describe("LoanService.pickupLoan", () => {
       prismaMock.loan.update.mockResolvedValue({ ...pendingLoan, borrowedAt: now });
       prismaMock.gear.updateMany.mockResolvedValue({ count: 1 });
 
-      await LoanService.pickupLoan("loan-1");
+      await LoanService.pickupLoan("loan-1", "user-1");
 
       expect(prismaMock.loan.findUnique).toHaveBeenCalledWith({
         where: { id: "loan-1" },
@@ -74,7 +74,7 @@ describe("LoanService.pickupLoan", () => {
       prismaMock.loan.update.mockResolvedValue({ ...pendingLoan, borrowedAt: now });
       prismaMock.gear.updateMany.mockResolvedValue({ count: 1 });
 
-      await LoanService.pickupLoan("loan-1");
+      await LoanService.pickupLoan("loan-1", "user-1");
 
       expect(prismaMock.loan.update).toHaveBeenCalledWith({
         where: { id: "loan-1" },
@@ -89,7 +89,7 @@ describe("LoanService.pickupLoan", () => {
       prismaMock.loan.update.mockResolvedValue({ ...singleItemLoan, borrowedAt: now });
       prismaMock.gear.updateMany.mockResolvedValue({ count: 1 });
 
-      await LoanService.pickupLoan("loan-1");
+      await LoanService.pickupLoan("loan-1", "user-1");
 
       expect(prismaMock.gear.updateMany).toHaveBeenCalledWith({
         where: { id: { in: ["camera-1"] } },
@@ -105,7 +105,7 @@ describe("LoanService.pickupLoan", () => {
       prismaMock.loan.update.mockResolvedValue({ ...pendingLoan, borrowedAt: now });
       prismaMock.gear.updateMany.mockResolvedValue({ count: 2 });
 
-      await LoanService.pickupLoan("loan-1");
+      await LoanService.pickupLoan("loan-1", "user-1");
 
       expect(prismaMock.gear.updateMany).toHaveBeenCalledWith({
         where: { id: { in: ["camera-1", "lens-1"] } },
@@ -120,7 +120,7 @@ describe("LoanService.pickupLoan", () => {
       prismaMock.loan.update.mockResolvedValue(updatedLoan);
       prismaMock.gear.updateMany.mockResolvedValue({ count: 2 });
 
-      const result = await LoanService.pickupLoan("loan-1");
+      const result = await LoanService.pickupLoan("loan-1", "user-1");
 
       expect(result).toEqual(updatedLoan);
     });
@@ -130,7 +130,13 @@ describe("LoanService.pickupLoan", () => {
     it("throws NotFoundError when the loan ID does not exist", async () => {
       prismaMock.loan.findUnique.mockResolvedValue(null);
 
-      await expect(LoanService.pickupLoan("nonexistent-id")).rejects.toThrow(NotFoundError);
+      await expect(LoanService.pickupLoan("nonexistent-id", "user-1")).rejects.toThrow(NotFoundError);
+    });
+
+    it("throws NotFoundError when the loan belongs to a different user", async () => {
+      prismaMock.loan.findUnique.mockResolvedValue(pendingLoan as unknown as Loan);
+
+      await expect(LoanService.pickupLoan("loan-1", "other-user")).rejects.toThrow(NotFoundError);
     });
 
     it("throws ConflictError when the loan has already been picked up", async () => {
@@ -138,7 +144,7 @@ describe("LoanService.pickupLoan", () => {
         alreadyPickedUpLoan as unknown as Loan
       );
 
-      await expect(LoanService.pickupLoan("loan-1")).rejects.toThrow(ConflictError);
+      await expect(LoanService.pickupLoan("loan-1", "user-1")).rejects.toThrow(ConflictError);
     });
   });
 });

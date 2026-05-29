@@ -72,13 +72,17 @@ export const LoanService = {
     });
   },
 
-  async pickupLoan(loanId: string): Promise<Loan> {
+  async pickupLoan(loanId: string, requestingUserId: string): Promise<Loan> {
     const loan = await prisma.loan.findUnique({
       where: { id: loanId },
       include: { items: true },
     }) as LoanWithItems | null;
 
     if (!loan) {
+      throw new NotFoundError(`Loan with id ${loanId} not found`);
+    }
+
+    if (loan.userId !== requestingUserId) {
       throw new NotFoundError(`Loan with id ${loanId} not found`);
     }
 

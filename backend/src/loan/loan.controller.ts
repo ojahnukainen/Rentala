@@ -14,7 +14,7 @@ export const LoanController = {
 
   async pickupLoan(req: Request<{ id: string }>, res: Response, next: NextFunction): Promise<void> {
     try {
-      const loan = await LoanService.pickupLoan(req.params.id);
+      const loan = await LoanService.pickupLoan(req.params.id, req.user!.id);
       res.json(loan);
     } catch (err) {
       next(err);
