@@ -17,7 +17,9 @@ export const LoanService = {
       throw new ValidationError("At least one gear item is required");
     }
 
-    if (startDate < new Date()) {
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    if (startDate < startOfToday) {
       throw new ValidationError("Start date cannot be in the past");
     }
 
