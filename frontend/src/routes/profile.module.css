@@ -1,0 +1,95 @@
+.page {
+  background: #f7fce8;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  padding: 32px 31px;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  color: #181d12;
+  letter-spacing: -0.9px;
+  margin-bottom: 24px;
+}
+
+.heroTitle {
+  font-weight: 800;
+  font-size: 36px;
+  line-height: 40px;
+  margin: 0;
+}
+
+.heroSubtitle {
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 24px;
+  margin: 0;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid rgba(193, 202, 176, 0.1);
+  border-radius: 12px;
+  padding: 4px 17px;
+  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 16px 0;
+}
+
+.fieldLabel {
+  font-weight: 700;
+  font-size: 10px;
+  line-height: 15px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #414a36;
+}
+
+.fieldValue {
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  color: #181d12;
+}
+
+.divider {
+  height: 1px;
+  background: #f1f6e3;
+}
+
+.actions {
+  margin-top: 24px;
+}
+
+.signOutBtn {
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 32px;
+  background: #690000;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 24px;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0px 10px 15px -3px rgba(105, 0, 0, 0.2), 0px 4px 6px -4px rgba(105, 0, 0, 0.2);
+}
+
+.signOutBtn:hover:not(:disabled) {
+  background: #520000;
+}
+
+.signOutBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

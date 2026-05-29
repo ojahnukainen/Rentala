@@ -2,12 +2,13 @@ import { useEffect, lazy, Suspense } from 'react'
 import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
 import { useAuthStore } from '../store/useAuthStore'
 
+
 const TanStackRouterDevtools = import.meta.env.DEV
   ? lazy(() => import('@tanstack/router-devtools').then((m) => ({ default: m.TanStackRouterDevtools })))
   : () => null
 
 function RootLayout() {
-  const fetchSession = useAuthStore((s) => s.fetchSession)
+  const { fetchSession, user } = useAuthStore()
 
   useEffect(() => {
     fetchSession()
@@ -19,7 +20,10 @@ function RootLayout() {
         <Link to="/dashboard" activeProps={{ style: { fontWeight: 'bold' } }}>Dashboard</Link>
         <Link to="/gear" activeProps={{ style: { fontWeight: 'bold' } }}>Gear</Link>
         <Link to="/checkout" activeProps={{ style: { fontWeight: 'bold' } }}>Checkout</Link>
-        <Link to="/login" activeProps={{ style: { fontWeight: 'bold' } }}>Login</Link>
+        {user
+          ? <Link to="/profile" activeProps={{ style: { fontWeight: 'bold' } }}>{user.name.split(' ')[0]}</Link>
+          : <Link to="/login" activeProps={{ style: { fontWeight: 'bold' } }}>Login</Link>
+        }
       </nav>
       <Outlet />
       <Suspense>
