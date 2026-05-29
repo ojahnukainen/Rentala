@@ -17,3 +17,16 @@ export interface Loan {
   createdAt: string
   updatedAt: string
 }
+
+export interface LoanItem {
+  id: string
+  loanId: string
+  gearId: string
+  status: 'ACTIVE' | 'RETURNED' | 'OVERDUE' | 'LOST'
+  returnedAt: string | null
+  gear: Gear
+}
+
+export interface LoanWithItems extends Loan {
+  items: LoanItem[]
+}

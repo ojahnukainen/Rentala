@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { toInputValue, fromInputValue } from '../lib/dates'
 import styles from './DatepickerComponent.module.css'
 
 type QuickSelect = '2days' | '1week' | 'custom'
@@ -31,6 +32,12 @@ function formatDate(date: Date) {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
+function noonToday(): Date {
+  const d = new Date()
+  d.setHours(12, 0, 0, 0)
+  return d
+}
+
 export default function DatepickerComponent({
   pickupDate,
   returnDate,
@@ -39,10 +46,28 @@ export default function DatepickerComponent({
 }: DatepickerComponentProps) {
   const [active, setActive] = useState<QuickSelect | null>(null)
 
+  function handlePickupChange(value: string) {
+    if (!value) return
+    const newPickup = fromInputValue(value)
+    // If return is now on or before pickup, push it forward by 1 day
+    const newReturn = newPickup >= returnDate
+      ? new Date(newPickup.getTime() + 86_400_000)
+      : returnDate
+    setActive(null)
+    onDatesChange?.(newPickup, newReturn)
+  }
+
+  function handleReturnChange(value: string) {
+    if (!value) return
+    const newReturn = fromInputValue(value)
+    setActive(null)
+    onDatesChange?.(pickupDate, newReturn)
+  }
+
   function applyQuickSelect(preset: QuickSelect) {
     setActive(preset)
     const pickup = new Date()
-    pickup.setHours(0, 0, 0, 0)
+    pickup.setHours(12, 0, 0, 0)
     if (preset === '2days') {
       const ret = new Date(pickup)
       ret.setDate(ret.getDate() + 2)
@@ -52,29 +77,58 @@ export default function DatepickerComponent({
       ret.setDate(ret.getDate() + 7)
       onDatesChange?.(pickup, ret)
     } else {
-      onDatesChange?.(pickupDate, returnDate)
+      // custom — keep current and let user pick via calendar fields
     }
   }
+
+  const todayValue = toInputValue(noonToday())
+  // Return min is the day after pickup
+  const returnMin = toInputValue(new Date(pickupDate.getTime() + 86_400_000))
 
   return (
     <div className={styles.wrapper}>
       {!readOnly && <span className={styles.label}>Date for the rent</span>}
       <div className={styles.card}>
         <div className={styles.dateFields}>
+
+          {/* Pickup Date */}
           <div className={styles.dateInput}>
             <CalendarIcon />
             <div className={styles.dateInputContent}>
               <span className={styles.dateInputHeader}>Pickup Date</span>
               <span className={styles.dateInputValue}>{formatDate(pickupDate)}</span>
             </div>
+            {!readOnly && (
+              <input
+                type="date"
+                className={styles.dateNativeInput}
+                value={toInputValue(pickupDate)}
+                min={todayValue}
+                onChange={(e) => handlePickupChange(e.target.value)}
+                aria-label="Pickup date"
+              />
+            )}
           </div>
+
+          {/* Return Date */}
           <div className={styles.dateInput}>
             <CalendarIcon />
             <div className={styles.dateInputContent}>
               <span className={styles.dateInputHeader}>Return Date</span>
               <span className={styles.dateInputValue}>{formatDate(returnDate)}</span>
             </div>
+            {!readOnly && (
+              <input
+                type="date"
+                className={styles.dateNativeInput}
+                value={toInputValue(returnDate)}
+                min={returnMin}
+                onChange={(e) => handleReturnChange(e.target.value)}
+                aria-label="Return date"
+              />
+            )}
           </div>
+
         </div>
 
         {!readOnly && (

@@ -1,0 +1,115 @@
+.page {
+  background: #f7fce8;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.hero {
+  padding: 32px 31px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  color: #181d12;
+  letter-spacing: -0.9px;
+}
+
+.heroTitle {
+  font-weight: 800;
+  font-size: 36px;
+  line-height: 40px;
+  margin: 0;
+}
+
+.heroSubtitle {
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 24px;
+  margin: 0;
+}
+
+.bookingSection {
+  padding: 24px 31px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.sectionLabel {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: #181d12;
+  margin: 0;
+}
+
+.browseBtn {
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 32px;
+  background: linear-gradient(135deg, #416900 100%, #0052ff 100%);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 24px;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0px 10px 15px -3px rgba(65, 105, 0, 0.2), 0px 4px 6px -4px rgba(65, 105, 0, 0.2);
+  margin-top: 4px;
+}
+
+.browseBtn:hover {
+  background: linear-gradient(135deg, #335300 100%, #0052ff 100%);
+}
+
+.loansSection {
+  padding: 32px 31px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.subSectionLabel {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: #181d12;
+  margin: 0;
+  padding-top: 8px;
+}
+
+.cardList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stateMsg {
+  font-size: 14px;
+  color: #434656;
+  padding: 8px 0;
+}
+
+.loginMsg {
+  font-size: 14px;
+  color: #434656;
+  padding: 8px 0;
+}
+
+.loginLink {
+  background: none;
+  border: none;
+  color: #416900;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+}

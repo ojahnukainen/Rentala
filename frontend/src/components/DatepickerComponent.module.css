@@ -40,10 +40,28 @@
   align-items: center;
   gap: 12px;
   cursor: pointer;
+  position: relative; /* anchor for the native input overlay */
 }
 
 .dateInput:hover {
   background: #e8efd6;
+}
+
+/* Invisible native date input stretched over the whole field.
+   On mobile this triggers the OS date picker; on desktop the browser picker. */
+.dateNativeInput {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  /* Remove default appearance so the overlay is truly invisible */
+  -webkit-appearance: none;
+  appearance: none;
+  border: none;
+  background: transparent;
+  font-size: 16px; /* prevents iOS zoom on focus */
 }
 
 .calendarIcon {
