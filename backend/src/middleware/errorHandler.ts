@@ -13,8 +13,8 @@ export function errorHandler(
     });
     return;
   }
-
+  console.error(err);
   res.status(500).json({
-    error: { name: "InternalServerError", message: "An unexpected error occurred", details: err },
+    error: { name: "InternalServerError", message: "An unexpected error occurred"},
   });
 }

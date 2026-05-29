@@ -1,7 +1,10 @@
-import { useEffect } from 'react'
+import { useEffect, lazy, Suspense } from 'react'
 import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import { useAuthStore } from '../store/useAuthStore'
+
+const TanStackRouterDevtools = import.meta.env.DEV
+  ? lazy(() => import('@tanstack/router-devtools').then((m) => ({ default: m.TanStackRouterDevtools })))
+  : () => null
 
 function RootLayout() {
   const fetchSession = useAuthStore((s) => s.fetchSession)
@@ -19,7 +22,9 @@ function RootLayout() {
         <Link to="/login" activeProps={{ style: { fontWeight: 'bold' } }}>Login</Link>
       </nav>
       <Outlet />
-      <TanStackRouterDevtools />
+      <Suspense>
+        <TanStackRouterDevtools />
+      </Suspense>
     </>
   )
 }
