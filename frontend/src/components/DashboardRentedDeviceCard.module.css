@@ -1,10 +1,16 @@
 .card {
   background: #ffffff;
   border-radius: 8px;
-  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.cardHeader {
   display: flex;
   align-items: center;
   gap: 16px;
+  padding: 11px 12px 12px;
 }
 
 .info {
@@ -84,6 +90,10 @@
   background: #d8ddc8;
 }
 
+.btnInfoActive {
+  background: #d8ddc8;
+}
+
 .btnAction {
   position: relative;
   border: none;
@@ -123,6 +133,98 @@
 }
 
 .btnAction:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ── Expanded details ── */
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 12px 12px;
+}
+
+.detailsTitle {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 20px;
+  color: #171c1f;
+  margin: 0;
+  padding: 6px 0;
+}
+
+.deviceList {
+  list-style: disc;
+  padding-left: 18px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.deviceListItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.deviceName {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
+  color: #434656;
+  flex: 1;
+}
+
+.btnRemove {
+  background: #690000;
+  border: none;
+  border-radius: 8px;
+  padding: 0 12px;
+  height: 20px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 24px;
+  color: #ffffff;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0px 10px 15px -3px rgba(65, 105, 0, 0.2), 0px 4px 6px -4px rgba(65, 105, 0, 0.2);
+}
+
+.btnRemove:hover:not(:disabled) {
+  background: #520000;
+}
+
+.btnRemove:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btnCancelReservation {
+  align-self: center;
+  background: transparent;
+  border: 1px solid #690101;
+  border-radius: 8px;
+  padding: 0 50px;
+  height: 24px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 24px;
+  color: #690101;
+  cursor: pointer;
+}
+
+.btnCancelReservation:hover:not(:disabled) {
+  background: rgba(105, 1, 1, 0.05);
+}
+
+.btnCancelReservation:disabled {
   opacity: 0.7;
   cursor: not-allowed;
 }
