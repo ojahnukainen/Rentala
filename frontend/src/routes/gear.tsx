@@ -43,7 +43,6 @@ function GearListPage() {
 
   // Group available gear by category
   const grouped = gear
-    .filter((g) => g.status === 'AVAILABLE')
     .reduce<Record<string, Gear[]>>((acc, g) => {
       if (!acc[g.category]) acc[g.category] = []
       acc[g.category].push(g)

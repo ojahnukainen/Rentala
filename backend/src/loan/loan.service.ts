@@ -42,7 +42,7 @@ export const LoanService = {
     const overlappingItems = await prisma.loanItem.findMany({
       where: {
         gearId: { in: gearIds },
-        status: { in: [ItemStatus.ACTIVE, ItemStatus.OVERDUE] },
+        status: { in: [ItemStatus.RESERVED, ItemStatus.ACTIVE, ItemStatus.OVERDUE] },
         loan: {
           startDate: { lt: dueDate },
           dueDate: { gt: startDate },
@@ -66,7 +66,7 @@ export const LoanService = {
         data: gearIds.map((gearId) => ({
           loanId: loan.id,
           gearId,
-          status: ItemStatus.ACTIVE,
+          status: ItemStatus.RESERVED,
         })),
       });
 
@@ -98,6 +98,11 @@ export const LoanService = {
       const updatedLoan = await tx.loan.update({
         where: { id: loanId },
         data: { borrowedAt: new Date() },
+      });
+
+      await tx.loanItem.updateMany({
+        where: { loanId, status: ItemStatus.RESERVED },
+        data: { status: ItemStatus.ACTIVE },
       });
 
       await tx.gear.updateMany({

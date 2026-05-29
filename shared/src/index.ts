@@ -19,6 +19,7 @@ export const GearStatus = {
 export type GearStatus = (typeof GearStatus)[keyof typeof GearStatus];
 
 export const ItemStatus = {
+  RESERVED: "RESERVED",
   ACTIVE: "ACTIVE",
   RETURNED: "RETURNED",
   OVERDUE: "OVERDUE",

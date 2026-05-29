@@ -22,7 +22,7 @@ export interface LoanItem {
   id: string
   loanId: string
   gearId: string
-  status: 'ACTIVE' | 'RETURNED' | 'OVERDUE' | 'LOST'
+  status: 'RESERVED' | 'ACTIVE' | 'RETURNED' | 'OVERDUE' | 'LOST'
   returnedAt: string | null
   gear: Gear
 }
