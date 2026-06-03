@@ -65,10 +65,8 @@ function DashboardPage() {
           pickupDate={pickup}
           returnDate={ret}
           onDatesChange={handleDatesChange}
+          onSubmit={() => navigate({ to: '/gear' })}
         />
-        <button type="button" className={styles.browseBtn} onClick={() => navigate({ to: '/gear' })}>
-          See available devices
-        </button>
       </div>
 
       <div className={styles.loansSection}>

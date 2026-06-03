@@ -1,0 +1,294 @@
+/* ─── Full-screen overlay ─────────────────────────────────────────────────── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ─── Header ──────────────────────────────────────────────────────────────── */
+.header {
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(193, 202, 176, 0.3);
+  flex-shrink: 0;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #181d12;
+  padding: 4px 8px;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.closeBtn:hover {
+  background: #f1f6e3;
+}
+
+.headerTitle {
+  flex: 1;
+  text-align: center;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: #416902;
+}
+
+.headerSpacer {
+  /* balances the close button so the title is truly centered */
+  width: 40px;
+}
+
+/* ─── Summary bar ─────────────────────────────────────────────────────────── */
+.summaryBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: #ffffff;
+  border-bottom: 1px solid rgba(193, 202, 176, 0.3);
+  flex-shrink: 0;
+}
+
+.summaryField {
+  flex: 1;
+  min-width: 0;
+  background: #f1f6e3;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.summaryField:hover {
+  background: #e8efd6;
+}
+
+.summaryFieldActive {
+  border-color: #7ec600;
+}
+
+.calendarIcon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 20px;
+  color: #416900;
+}
+
+.summaryFieldContent {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.summaryFieldLabel {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  line-height: 15px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #414a36;
+}
+
+.summaryFieldValue {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  color: #181d12;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.summaryArrow {
+  font-size: 18px;
+  color: #c1cab0;
+  flex-shrink: 0;
+}
+
+/* ─── Weekday header row ──────────────────────────────────────────────────── */
+.weekdayHeader {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: #010f1f;
+  padding: 10px 16px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.weekdayCell {
+  text-align: center;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #c1cab0;
+}
+
+/* ─── Scrollable calendar area ────────────────────────────────────────────── */
+.scrollArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 16px 24px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ─── Month block ─────────────────────────────────────────────────────────── */
+.monthBlock {
+  margin-top: 24px;
+}
+
+.monthTitle {
+  text-align: center;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  color: #416902;
+  margin-bottom: 12px;
+}
+
+.monthGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+/* ─── Day cell ────────────────────────────────────────────────────────────── */
+.dayCell {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Range background layer (absolute, behind the button) */
+.rangeBg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(126, 198, 0, 0.15);
+  z-index: 0;
+}
+
+.rangeStart {
+  left: 50%;
+  right: 0;
+}
+
+.rangeEnd {
+  left: 0;
+  right: 50%;
+}
+
+.rangeMiddle {
+  left: 0;
+  right: 0;
+}
+
+/* Day button */
+.dayBtn {
+  position: relative;
+  z-index: 1;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  color: #181d12;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dayBtn:hover:not(:disabled) {
+  background: #f1f6e3;
+  border-radius: 4px;
+}
+
+.dayBtnSelected {
+  background: #416901 !important;
+  color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 0 0 4px rgba(126, 198, 0, 0.2);
+}
+
+.dayBtnPast {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ─── Footer ──────────────────────────────────────────────────────────────── */
+.footer {
+  padding: 16px 20px;
+  background: #ffffff;
+  border-top: 1px solid rgba(193, 202, 176, 0.3);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footerCount {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.footerDays {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 24px;
+  color: #7ec600;
+}
+
+.footerSelected {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  color: #c1cab0;
+}
+
+.confirmBtn {
+  width: 100%;
+  height: 56px;
+  background: #7ec600;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  color: #1f3700;
+  cursor: pointer;
+  box-shadow: 0px 10px 20px -4px rgba(126, 198, 0, 0.35);
+}
+
+.confirmBtn:hover:not(:disabled) {
+  background: #6db100;
+}
+
+.confirmBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

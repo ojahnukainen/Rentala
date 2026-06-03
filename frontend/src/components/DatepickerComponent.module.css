@@ -1,20 +1,3 @@
-.wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 11px;
-  width: 100%;
-}
-
-.label {
-  font-family: 'Inter', system-ui, sans-serif;
-  font-weight: 700;
-  font-size: 14px;
-  line-height: 20px;
-  letter-spacing: 1.4px;
-  text-transform: uppercase;
-  color: #181d12;
-}
-
 .card {
   background: #ffffff;
   border: 1px solid rgba(193, 202, 176, 0.1);
@@ -28,11 +11,13 @@
 
 .dateFields {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 16px;
 }
 
 .dateInput {
+  flex: 1;
+  min-width: 0;
   background: #f1f6e3;
   border-radius: 8px;
   padding: 12px;
@@ -40,7 +25,7 @@
   align-items: center;
   gap: 12px;
   cursor: pointer;
-  position: relative; /* anchor for the native input overlay */
+  position: relative;
 }
 
 .dateInput:hover {
@@ -56,7 +41,6 @@
   height: 100%;
   opacity: 0;
   cursor: pointer;
-  /* Remove default appearance so the overlay is truly invisible */
   -webkit-appearance: none;
   appearance: none;
   border: none;
@@ -97,6 +81,7 @@
 .quickSelect {
   display: flex;
   gap: 8px;
+  justify-content: center;
   padding: 0 8px;
 }
 

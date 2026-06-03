@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { toInputValue, fromInputValue } from '../lib/dates'
 import styles from './DatepickerComponent.module.css'
+import CalendarPicker from './CalendarPicker'
 
-type QuickSelect = '2days' | '1week' | 'custom'
+type QuickSelect = '2days' | '1week'
 
 interface DatepickerComponentProps {
   pickupDate: Date
   returnDate: Date
   readOnly?: boolean
   onDatesChange?: (pickup: Date, returnDate: Date) => void
+  onSubmit?: () => void
 }
 
 function CalendarIcon() {
@@ -43,13 +45,14 @@ export default function DatepickerComponent({
   returnDate,
   readOnly = false,
   onDatesChange,
+  onSubmit,
 }: DatepickerComponentProps) {
   const [active, setActive] = useState<QuickSelect | null>(null)
+  const [calendarOpen, setCalendarOpen] = useState(false)
 
   function handlePickupChange(value: string) {
     if (!value) return
     const newPickup = fromInputValue(value)
-    // If return is now on or before pickup, push it forward by 1 day
     const newReturn = newPickup >= returnDate
       ? new Date(newPickup.getTime() + 86_400_000)
       : returnDate
@@ -66,65 +69,81 @@ export default function DatepickerComponent({
 
   function applyQuickSelect(preset: QuickSelect) {
     setActive(preset)
+    setCalendarOpen(false)
     const pickup = new Date()
     pickup.setHours(12, 0, 0, 0)
-    if (preset === '2days') {
-      const ret = new Date(pickup)
-      ret.setDate(ret.getDate() + 2)
-      onDatesChange?.(pickup, ret)
-    } else if (preset === '1week') {
-      const ret = new Date(pickup)
-      ret.setDate(ret.getDate() + 7)
-      onDatesChange?.(pickup, ret)
-    } else {
-      // custom — keep current and let user pick via calendar fields
-    }
+    const ret = new Date(pickup)
+    ret.setDate(ret.getDate() + (preset === '2days' ? 2 : 7))
+    onDatesChange?.(pickup, ret)
+  }
+
+  function handleCalendarConfirm(pickup: Date, ret: Date) {
+    setActive(null)
+    setCalendarOpen(false)
+    onDatesChange?.(pickup, ret)
   }
 
   const todayValue = toInputValue(noonToday())
-  // Return min is the day after pickup
   const returnMin = toInputValue(new Date(pickupDate.getTime() + 86_400_000))
 
   return (
-    <div className={styles.wrapper}>
-      {!readOnly && <span className={styles.label}>Date for the rent</span>}
+    <>
       <div className={styles.card}>
         <div className={styles.dateFields}>
 
           {/* Pickup Date */}
-          <div className={styles.dateInput}>
+          <div
+            className={styles.dateInput}
+            onClick={!readOnly ? () => setCalendarOpen(true) : undefined}
+            role={!readOnly ? 'button' : undefined}
+            tabIndex={!readOnly ? 0 : undefined}
+            onKeyDown={!readOnly ? (e) => { if (e.key === 'Enter' || e.key === ' ') setCalendarOpen(true) } : undefined}
+            aria-label={!readOnly ? 'Open calendar to select pickup date' : undefined}
+          >
             <CalendarIcon />
             <div className={styles.dateInputContent}>
               <span className={styles.dateInputHeader}>Pickup Date</span>
               <span className={styles.dateInputValue}>{formatDate(pickupDate)}</span>
             </div>
-            {!readOnly && (
+            {/* Legacy hidden native input kept only for readOnly mode display parity — not used in interactive mode */}
+            {readOnly && (
               <input
                 type="date"
                 className={styles.dateNativeInput}
                 value={toInputValue(pickupDate)}
                 min={todayValue}
+                readOnly
+                tabIndex={-1}
+                aria-hidden="true"
                 onChange={(e) => handlePickupChange(e.target.value)}
-                aria-label="Pickup date"
               />
             )}
           </div>
 
           {/* Return Date */}
-          <div className={styles.dateInput}>
+          <div
+            className={styles.dateInput}
+            onClick={!readOnly ? () => setCalendarOpen(true) : undefined}
+            role={!readOnly ? 'button' : undefined}
+            tabIndex={!readOnly ? 0 : undefined}
+            onKeyDown={!readOnly ? (e) => { if (e.key === 'Enter' || e.key === ' ') setCalendarOpen(true) } : undefined}
+            aria-label={!readOnly ? 'Open calendar to select return date' : undefined}
+          >
             <CalendarIcon />
             <div className={styles.dateInputContent}>
               <span className={styles.dateInputHeader}>Return Date</span>
               <span className={styles.dateInputValue}>{formatDate(returnDate)}</span>
             </div>
-            {!readOnly && (
+            {readOnly && (
               <input
                 type="date"
                 className={styles.dateNativeInput}
                 value={toInputValue(returnDate)}
                 min={returnMin}
+                readOnly
+                tabIndex={-1}
+                aria-hidden="true"
                 onChange={(e) => handleReturnChange(e.target.value)}
-                aria-label="Return date"
               />
             )}
           </div>
@@ -148,21 +167,25 @@ export default function DatepickerComponent({
               >
                 1 WEEK
               </button>
-              <button
-                type="button"
-                className={`${styles.quickBtn} ${active === 'custom' ? styles.quickBtnActive : ''}`}
-                onClick={() => applyQuickSelect('custom')}
-              >
-                CUSTOM
-              </button>
             </div>
 
-            <button type="button" className={styles.submitBtn}>
-              Update Dates
-            </button>
+            {onSubmit && (
+              <button type="button" className={styles.submitBtn} onClick={onSubmit}>
+                See available devices
+              </button>
+            )}
           </>
         )}
       </div>
-    </div>
+
+      {calendarOpen && !readOnly && (
+        <CalendarPicker
+          initialPickup={pickupDate}
+          initialReturn={returnDate}
+          onConfirm={handleCalendarConfirm}
+          onClose={() => setCalendarOpen(false)}
+        />
+      )}
+    </>
   )
 }
