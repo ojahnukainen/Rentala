@@ -15,4 +15,11 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+  advanced: {
+    useSecureCookies: process.env.SECURE_COOKIES === "true",
+    defaultCookieAttributes:
+      process.env.SECURE_COOKIES === "true"
+        ? { sameSite: "none", secure: true }
+        : undefined,
+  },
 });
