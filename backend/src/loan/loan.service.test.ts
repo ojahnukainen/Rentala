@@ -109,7 +109,7 @@ describe("LoanService.createLoan", () => {
       });
 
       expect(prismaMock.loanItem.createMany).toHaveBeenCalledWith({
-        data: [{ loanId: mockLoan.id, gearId: "camera-1", status: ItemStatus.ACTIVE }],
+        data: [{ loanId: mockLoan.id, gearId: "camera-1", status: ItemStatus.RESERVED }],
       });
     });
 
@@ -203,8 +203,8 @@ describe("LoanService.createLoan", () => {
 
       expect(prismaMock.loanItem.createMany).toHaveBeenCalledWith({
         data: [
-          { loanId: mockLoan.id, gearId: "camera-1", status: ItemStatus.ACTIVE },
-          { loanId: mockLoan.id, gearId: "lens-1", status: ItemStatus.ACTIVE },
+          { loanId: mockLoan.id, gearId: "camera-1", status: ItemStatus.RESERVED },
+          { loanId: mockLoan.id, gearId: "lens-1", status: ItemStatus.RESERVED },
         ],
       });
     });
