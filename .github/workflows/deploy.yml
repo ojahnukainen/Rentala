@@ -80,6 +80,12 @@ jobs:
           DATABASE_URL: ${{ secrets.STAGING_DIRECT_DATABASE_URL }}
         run: npx prisma migrate deploy
 
+      - name: Seed staging database
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DIRECT_DATABASE_URL }}
+        run: npx tsx prisma/seed.ts
+
       - name: Deploy frontend to staging
         run: curl -X POST "${{ secrets.RENDER_STAGING_FRONTEND_HOOK }}"
 
