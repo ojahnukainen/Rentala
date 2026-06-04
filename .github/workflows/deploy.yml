@@ -1,28 +1,86 @@
- deploy-staging:                                                                                                                                                
-    needs: test-and-build                                                                                                                                        
-    if: github.ref == 'refs/heads/staging'                                                                                                                     
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [staging]
+
+jobs:
+  test-and-build:
     runs-on: ubuntu-latest
-    steps:                                                                                                                                                       
+
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: rentaladb_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
       - name: Checkout code
-        uses: actions/checkout@v4                                                                                                                                
-                                                                                                                                                               
+        uses: actions/checkout@v4
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-          cache: 'npm'                                                                                                                                           
-   
-      - name: Install dependencies                                                                                                                               
-        run: npm install                                                                                                                                       
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate Prisma client
+        working-directory: backend
+        run: npx prisma generate
+
+      - name: Run backend tests
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/rentaladb_test
+        run: |
+          npx prisma migrate deploy
+          npm test
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+  deploy-staging:
+    needs: test-and-build
+    if: github.ref == 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate Prisma client
+        working-directory: backend
+        run: npx prisma generate
 
       - name: Run staging migrations
         working-directory: backend
         env:
-          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.STAGING_DIRECT_DATABASE_URL }}
         run: npx prisma migrate deploy
-                                                                                                                                                                 
+
       - name: Deploy frontend to staging
-        run: curl -X POST "${{ secrets.RENDER_STAGING_FRONTEND_HOOK }}"                                                                                          
-                                                                                                                                                               
+        run: curl -X POST "${{ secrets.RENDER_STAGING_FRONTEND_HOOK }}"
+
       - name: Deploy backend to staging
         run: curl -X POST "${{ secrets.RENDER_STAGING_BACKEND_HOOK }}"
