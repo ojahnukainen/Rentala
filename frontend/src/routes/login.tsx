@@ -4,8 +4,8 @@ import { useAuthStore } from '../store/useAuthStore'
 import styles from './login.module.css'
 
 export const Route = createFileRoute('/login')({
-  validateSearch: (search: Record<string, unknown>) => ({
-    redirect: (search.redirect as string | undefined) ?? '/gear',
+  validateSearch: (search: Record<string, unknown>): { redirect?: string } => ({
+    redirect: search.redirect as string | undefined,
   }),
   component: LoginPage,
 })
@@ -30,7 +30,7 @@ function LoginPage() {
       } else {
         await signUp(email, password, name)
       }
-      navigate({ to: redirect })
+      navigate({ to: redirect ?? '/gear' })
     } catch {
       // error is already in store
     }
