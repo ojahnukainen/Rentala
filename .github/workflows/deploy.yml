@@ -1,0 +1,28 @@
+ deploy-staging:                                                                                                                                                
+    needs: test-and-build                                                                                                                                        
+    if: github.ref == 'refs/heads/staging'                                                                                                                     
+    runs-on: ubuntu-latest
+    steps:                                                                                                                                                       
+      - name: Checkout code
+        uses: actions/checkout@v4                                                                                                                                
+                                                                                                                                                               
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'                                                                                                                                           
+   
+      - name: Install dependencies                                                                                                                               
+        run: npm install                                                                                                                                       
+
+      - name: Run staging migrations
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+        run: npx prisma migrate deploy
+                                                                                                                                                                 
+      - name: Deploy frontend to staging
+        run: curl -X POST "${{ secrets.RENDER_STAGING_FRONTEND_HOOK }}"                                                                                          
+                                                                                                                                                               
+      - name: Deploy backend to staging
+        run: curl -X POST "${{ secrets.RENDER_STAGING_BACKEND_HOOK }}"
