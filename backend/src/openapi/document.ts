@@ -76,6 +76,15 @@ const ReturnResultSchema = registry.register(
     .openapi("ReturnResult")
 );
 
+const LoanStatsResponseSchema = registry.register(
+  "LoanStats",
+  z
+    .object({
+      activeLoans: z.number().int().nonnegative().openapi({ example: 432 }),
+    })
+    .openapi("LoanStats")
+);
+
 // ── Shared error responses ────────────────────────────────────────────────────
 
 const responses400 = {
@@ -312,6 +321,24 @@ registry.registerPath({
 });
 
 // ── Loan routes ───────────────────────────────────────────────────────────────
+
+registry.registerPath({
+  method: "get",
+  path: "/api/v1/loans/stats",
+  tags: ["Loans"],
+  summary: "Get aggregate loan statistics",
+  description: "Returns counts used by the admin dashboard.",
+  responses: {
+    200: {
+      description: "Aggregate stats",
+      content: { "application/json": { schema: LoanStatsResponseSchema } },
+    },
+    401: {
+      description: "Unauthenticated",
+      content: { "application/json": { schema: ErrorResponseSchema } },
+    },
+  },
+});
 
 registry.registerPath({
   method: "post",

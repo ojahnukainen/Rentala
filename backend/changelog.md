@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- `GET /api/v1/loans/stats` — returns `{ activeLoans }` for the admin dashboard; auth-required
+- `LoanService.getStats` — counts loans that are not fully returned (zero items OR at least one non-RETURNED item)
+- `LoanStatsResponseSchema` and `LoanStatsResponse` type added to `@rentala_project/shared`
+- OpenAPI: `LoanStats` schema component + `GET /api/v1/loans/stats` path registered in `src/openapi/document.ts`
 - Initialized Node.js + TypeScript project with strict mode enabled
 - Installed Express, Prisma, Zod, Vitest, Supertest, vitest-mock-extended, swagger-ui-express, @asteasolutions/zod-to-openapi and all related @types packages
 - Configured `tsconfig.json` with `"strict": true`, CommonJS module output

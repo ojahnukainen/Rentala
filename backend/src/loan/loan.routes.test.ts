@@ -305,3 +305,24 @@ describe("POST /loans/returns", () => {
     expect(res.status).toBe(409);
   });
 });
+
+describe("GET /loans/stats", () => {
+  it("returns 200 with the active loans count for an authenticated user", async () => {
+    prismaMock.loan.count.mockResolvedValue(3);
+
+    const res = await request(app).get("/loans/stats");
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ activeLoans: 3 });
+  });
+
+  it("returns 401 for an unauthenticated request", async () => {
+    vi.mocked(requireAuth).mockImplementationOnce((_req, _res, next) => {
+      next(new AppError("Unauthorized", 401));
+    });
+
+    const res = await request(app).get("/loans/stats");
+
+    expect(res.status).toBe(401);
+  });
+});

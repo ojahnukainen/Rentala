@@ -127,6 +127,19 @@ export const LoanService = {
     });
   },
 
+  async getStats(): Promise<{ activeLoans: number }> {
+    const activeLoans = await prisma.loan.count({
+      where: {
+        OR: [
+          { items: { none: {} } },
+          { items: { some: { NOT: { status: ItemStatus.RETURNED } } } },
+        ],
+      },
+    });
+
+    return { activeLoans };
+  },
+
   async processReturn(loanItemIds: string[]): Promise<ReturnResult> {
     const items = await prisma.loanItem.findMany({
       where: { id: { in: loanItemIds } },

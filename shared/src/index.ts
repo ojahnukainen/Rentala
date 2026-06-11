@@ -62,3 +62,9 @@ export const ProcessReturnSchema = z.object({
 });
 
 export type ProcessReturnInput = z.infer<typeof ProcessReturnSchema>;
+
+export const LoanStatsResponseSchema = z.object({
+  activeLoans: z.number().int().nonnegative(),
+});
+
+export type LoanStatsResponse = z.infer<typeof LoanStatsResponseSchema>;

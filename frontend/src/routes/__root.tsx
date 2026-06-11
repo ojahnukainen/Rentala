@@ -20,6 +20,7 @@ function RootLayout() {
         <Link to="/dashboard" activeProps={{ style: { fontWeight: 'bold' } }}>Dashboard</Link>
         <Link to="/gear" activeProps={{ style: { fontWeight: 'bold' } }}>Gear</Link>
         <Link to="/checkout" activeProps={{ style: { fontWeight: 'bold' } }}>Checkout</Link>
+        <Link to="/admin" activeProps={{ style: { fontWeight: 'bold' } }}>Admin</Link>
         {user
           ? <Link to="/profile" activeProps={{ style: { fontWeight: 'bold' } }}>{user.name.split(' ')[0]}</Link>
           : <Link to="/login" activeProps={{ style: { fontWeight: 'bold' } }}>Login</Link>

@@ -9,3 +9,4 @@ export const loanRouter = Router();
 loanRouter.post("/", requireAuth, validate(CreateLoanSchema), LoanController.createLoan);
 loanRouter.post("/:id/pickup", requireAuth, LoanController.pickupLoan);
 loanRouter.post("/returns", requireAuth, validate(ProcessReturnSchema), LoanController.processReturn);
+loanRouter.get("/stats", requireAuth, LoanController.getStats);

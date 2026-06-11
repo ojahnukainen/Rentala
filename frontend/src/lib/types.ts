@@ -30,3 +30,12 @@ export interface LoanItem {
 export interface LoanWithItems extends Loan {
   items: LoanItem[]
 }
+
+export interface User {
+  id: string
+  email: string
+  name: string
+  role: 'MEMBER' | 'ADMIN'
+  createdAt: string
+  updatedAt: string
+}

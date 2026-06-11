@@ -1,0 +1,43 @@
+.card {
+  background: #f1f1e9;
+  border: 1px solid rgba(117, 121, 108, 0.05);
+  border-radius: 16px;
+  padding: 17px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #44483d;
+  line-height: 15px;
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1c18;
+  line-height: 32px;
+  margin: 0;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  background: #7ec600;
+  box-shadow: 0 0 8px 0 #7ec600;
+  margin-bottom: 6px;
+}

@@ -30,4 +30,13 @@ export const LoanController = {
       next(err);
     }
   },
+
+  async getStats(_req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const stats = await LoanService.getStats();
+      res.json(stats);
+    } catch (err) {
+      next(err);
+    }
+  },
 };

@@ -331,3 +331,29 @@ describe("LoanService.createLoan", () => {
     });
   });
 });
+
+describe("LoanService.getStats", () => {
+  it("returns the count of loans that are not fully returned", async () => {
+    prismaMock.loan.count.mockResolvedValue(7);
+
+    const result = await LoanService.getStats();
+
+    expect(result).toEqual({ activeLoans: 7 });
+    expect(prismaMock.loan.count).toHaveBeenCalledWith({
+      where: {
+        OR: [
+          { items: { none: {} } },
+          { items: { some: { NOT: { status: ItemStatus.RETURNED } } } },
+        ],
+      },
+    });
+  });
+
+  it("returns zero when there are no active loans", async () => {
+    prismaMock.loan.count.mockResolvedValue(0);
+
+    const result = await LoanService.getStats();
+
+    expect(result).toEqual({ activeLoans: 0 });
+  });
+});

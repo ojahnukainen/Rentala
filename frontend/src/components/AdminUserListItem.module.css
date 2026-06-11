@@ -1,0 +1,90 @@
+.card {
+  background: #f1f1e9;
+  border: 1px solid rgba(117, 121, 108, 0.05);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 9999px;
+  background: #ebebe3;
+  border: 2px solid rgba(117, 121, 108, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #44483d;
+  flex-shrink: 0;
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.headerRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1c18;
+  line-height: 20px;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.email {
+  font-size: 11px;
+  font-weight: 500;
+  color: #44483d;
+  line-height: 16.5px;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  line-height: 15px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.badgeAdmin {
+  color: #7ec600;
+  background: rgba(126, 198, 0, 0.1);
+}
+
+.badgeMember {
+  color: #151e0b;
+  background: #dce7c8;
+}
+
+.chevron {
+  color: #44483d;
+  font-size: 12px;
+  line-height: 1;
+  flex-shrink: 0;
+}
