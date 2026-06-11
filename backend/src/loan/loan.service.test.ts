@@ -5,6 +5,7 @@ import { LoanService } from "./loan.service";
 import { ValidationError, ConflictError, NotFoundError } from "../errors/AppError";
 import {
   Gear,
+  GearClassification,
   GearStatus,
   Loan,
   LoanItem,
@@ -19,6 +20,7 @@ const camera1: Gear = {
   serialNumber: "SN-BODY-001",
   category: "Camera Body",
   status: GearStatus.AVAILABLE,
+  classification: GearClassification.EVENT,
   createdAt: new Date(),
   updatedAt: new Date(),
 };
@@ -29,6 +31,7 @@ const lens1: Gear = {
   serialNumber: "SN-LENS-001",
   category: "Lens",
   status: GearStatus.AVAILABLE,
+  classification: GearClassification.EVENT,
   createdAt: new Date(),
   updatedAt: new Date(),
 };

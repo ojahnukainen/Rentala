@@ -1,6 +1,6 @@
 import prisma from "../lib/prisma";
-import { Gear, ItemStatus } from "../generated/prisma/client";
-import { NotFoundError } from "../errors/AppError";
+import { Gear, ItemStatus, Prisma } from "../generated/prisma/client";
+import { NotFoundError, ConflictError } from "../errors/AppError";
 import { CreateGearInput, ListGearQuery } from "./gear.schema";
 
 export const GearService = {
@@ -41,6 +41,13 @@ export const GearService = {
   },
 
   async createGear(data: CreateGearInput): Promise<Gear> {
-    return prisma.gear.create({ data });
+    try {
+      return await prisma.gear.create({ data });
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+        throw new ConflictError(`Gear with serialNumber ${data.serialNumber} already exists`);
+      }
+      throw err;
+    }
   },
 };

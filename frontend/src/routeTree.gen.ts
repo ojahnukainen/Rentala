@@ -17,6 +17,7 @@ import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as BookingResultRouteImport } from './routes/booking-result'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminGearNewRouteImport } from './routes/admin_.gear.new'
 
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
@@ -58,6 +59,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminGearNewRoute = AdminGearNewRouteImport.update({
+  id: '/admin_/gear/new',
+  path: '/admin/gear/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/gear': typeof GearRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
+  '/admin/gear/new': typeof AdminGearNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByTo {
   '/gear': typeof GearRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
+  '/admin/gear/new': typeof AdminGearNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +97,7 @@ export interface FileRoutesById {
   '/gear': typeof GearRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
+  '/admin_/gear/new': typeof AdminGearNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
     | '/gear'
     | '/login'
     | '/profile'
+    | '/admin/gear/new'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
     | '/gear'
     | '/login'
     | '/profile'
+    | '/admin/gear/new'
   id:
     | '__root__'
     | '/'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '/gear'
     | '/login'
     | '/profile'
+    | '/admin_/gear/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -132,6 +144,7 @@ export interface RootRouteChildren {
   GearRoute: typeof GearRoute
   LoginRoute: typeof LoginRoute
   ProfileRoute: typeof ProfileRoute
+  AdminGearNewRoute: typeof AdminGearNewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -192,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin_/gear/new': {
+      id: '/admin_/gear/new'
+      path: '/admin/gear/new'
+      fullPath: '/admin/gear/new'
+      preLoaderRoute: typeof AdminGearNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -204,6 +224,7 @@ const rootRouteChildren: RootRouteChildren = {
   GearRoute: GearRoute,
   LoginRoute: LoginRoute,
   ProfileRoute: ProfileRoute,
+  AdminGearNewRoute: AdminGearNewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

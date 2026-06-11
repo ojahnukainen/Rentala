@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- `GearClassification` enum (`EVENT`, `NON_EVENT`) added to Prisma; new `Gear.classification` column with `@default(EVENT)` migration backfills existing rows
+- `CreateGearSchema` in `@rentala_project/shared` now requires `classification`
+- `GearService.createGear` translates Prisma P2002 duplicate-serial errors into `ConflictError` (`409`)
+- OpenAPI: `Gear` schema gains `classification`; `POST /api/v1/gear` documents the new `409` response
 - `GET /api/v1/loans/stats` — returns `{ activeLoans }` for the admin dashboard; auth-required
 - `LoanService.getStats` — counts loans that are not fully returned (zero items OR at least one non-RETURNED item)
 - `LoanStatsResponseSchema` and `LoanStatsResponse` type added to `@rentala_project/shared`

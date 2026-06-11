@@ -67,7 +67,11 @@ function AdminPage() {
           />
         </div>
 
-        <button type="button" className={styles.addButton}>
+        <button
+          type="button"
+          className={styles.addButton}
+          onClick={() => navigate({ to: '/admin/gear/new' })}
+        >
           <span aria-hidden>＋</span>
           ADD New item
         </button>

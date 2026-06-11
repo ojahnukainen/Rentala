@@ -27,12 +27,19 @@ export const ItemStatus = {
 } as const;
 export type ItemStatus = (typeof ItemStatus)[keyof typeof ItemStatus];
 
+export const GearClassification = {
+  EVENT: "EVENT",
+  NON_EVENT: "NON_EVENT",
+} as const;
+export type GearClassification = (typeof GearClassification)[keyof typeof GearClassification];
+
 // ── Gear schemas ──────────────────────────────────────────────────────────────
 
 export const CreateGearSchema = z.object({
   name: z.string().min(1),
   serialNumber: z.string().min(1),
   category: z.string().min(1),
+  classification: z.enum([GearClassification.EVENT, GearClassification.NON_EVENT]),
 });
 
 export type CreateGearInput = z.infer<typeof CreateGearSchema>;

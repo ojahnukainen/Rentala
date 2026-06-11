@@ -34,6 +34,9 @@ const GearResponseSchema = registry.register(
       status: z
         .enum(["AVAILABLE", "RENTED", "MAINTENANCE", "LOST"])
         .openapi({ example: "AVAILABLE" }),
+      classification: z
+        .enum(["EVENT", "NON_EVENT"])
+        .openapi({ example: "EVENT" }),
       createdAt: z.string().datetime(),
       updatedAt: z.string().datetime(),
     })
@@ -244,6 +247,7 @@ registry.registerPath({
       content: { "application/json": { schema: GearResponseSchema } },
     },
     ...responses400,
+    ...responses409,
   },
 });
 

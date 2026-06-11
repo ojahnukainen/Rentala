@@ -21,6 +21,11 @@ enum GearStatus {
   LOST
 }
 
+enum GearClassification {
+  EVENT
+  NON_EVENT
+}
+
 enum ItemStatus {
   RESERVED
   ACTIVE
@@ -93,6 +98,7 @@ model Gear {
   serialNumber String     @unique
   category     String
   status       GearStatus @default(AVAILABLE)
+  classification GearClassification @default(EVENT)
   loanItems    LoanItem[]
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
