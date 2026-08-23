@@ -1,6 +1,6 @@
 # Rentala — Camera Club Gear Loaning System
 
-> **This is an MVP / proof-of-concept.** It is not production-ready and is intended solely to demonstrate the core idea. Security hardening, role-based access control, and other production concerns are not yet in place.
+> **This is proof-of-concept.** It is not production-ready and is intended solely to demonstrate the core idea. Security hardening, role-based access control, and other production concerns are not yet in place.
 
 A web application for managing gear loans in a camera club. Members can browse available equipment, reserve it for a date range, pick it up, and return it — including partial returns (e.g. return a camera body while keeping a lens).
 
@@ -26,7 +26,6 @@ A web application for managing gear loans in a camera club. Members can browse a
 | Validation | Zod 4 |
 | Auth | better-auth |
 | Frontend | Vite, React, TypeScript |
-| Monorepo | npm workspaces |
 
 ---
 
@@ -99,10 +98,12 @@ Frontend runs on `http://localhost:5173`.
 | `POST` | `/api/auth/sign-up/email` | — | Register |
 | `POST` | `/api/auth/sign-in/email` | — | Sign in |
 | `GET` | `/api/v1/gear` | — | List all gear |
+| `POST` | `/api/v1/gear` | Required | Add a gear item |
 | `POST` | `/api/v1/loans` | Required | Create a reservation |
 | `POST` | `/api/v1/loans/:id/pickup` | Required | Mark loan as picked up |
 | `POST` | `/api/v1/loans/returns` | Required | Return items (full or partial) |
-| `GET` | `/api/v1/users/:id/loans` | — | Get loans for a user |
+| `GET` | `/api/v1/users` | Required | List all users |
+| `GET` | `/api/v1/users/:id/loans` | Required (own only) | Get loans for a user |
 
 Full spec available at `/api-docs`.
 

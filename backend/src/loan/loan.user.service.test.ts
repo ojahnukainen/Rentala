@@ -103,7 +103,7 @@ describe("LoanService.getLoansByUser", () => {
       prismaMock.user.findUnique.mockResolvedValue(user1);
       prismaMock.loan.findMany.mockResolvedValue([loan1] as unknown as Loan[]);
 
-      await LoanService.getLoansByUser("user-1");
+      await LoanService.getLoansByUser("user-1", "user-1");
 
       expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
         where: { id: "user-1" },
@@ -114,7 +114,7 @@ describe("LoanService.getLoansByUser", () => {
       prismaMock.user.findUnique.mockResolvedValue(user1);
       prismaMock.loan.findMany.mockResolvedValue([loan1] as unknown as Loan[]);
 
-      await LoanService.getLoansByUser("user-1");
+      await LoanService.getLoansByUser("user-1", "user-1");
 
       expect(prismaMock.loan.findMany).toHaveBeenCalledWith({
         where: { userId: "user-1" },
@@ -126,7 +126,7 @@ describe("LoanService.getLoansByUser", () => {
       prismaMock.user.findUnique.mockResolvedValue(user1);
       prismaMock.loan.findMany.mockResolvedValue([loan1] as unknown as Loan[]);
 
-      const result = await LoanService.getLoansByUser("user-1");
+      const result = await LoanService.getLoansByUser("user-1", "user-1");
 
       expect(result).toEqual([loan1]);
     });
@@ -135,7 +135,7 @@ describe("LoanService.getLoansByUser", () => {
       prismaMock.user.findUnique.mockResolvedValue(user1);
       prismaMock.loan.findMany.mockResolvedValue([loan1, loan2] as unknown as Loan[]);
 
-      const result = await LoanService.getLoansByUser("user-1");
+      const result = await LoanService.getLoansByUser("user-1", "user-1");
 
       expect(result).toHaveLength(2);
     });
@@ -144,7 +144,7 @@ describe("LoanService.getLoansByUser", () => {
       prismaMock.user.findUnique.mockResolvedValue(user1);
       prismaMock.loan.findMany.mockResolvedValue([]);
 
-      const result = await LoanService.getLoansByUser("user-1");
+      const result = await LoanService.getLoansByUser("user-1", "user-1");
 
       expect(result).toEqual([]);
     });
@@ -155,8 +155,30 @@ describe("LoanService.getLoansByUser", () => {
       prismaMock.user.findUnique.mockResolvedValue(null);
 
       await expect(
-        LoanService.getLoansByUser("nonexistent-id")
+        LoanService.getLoansByUser("nonexistent-id", "nonexistent-id")
       ).rejects.toThrow(NotFoundError);
+    });
+  });
+
+  // Members may read only their own loans. A foreign id gets NotFound rather
+  // than 403 so the response does not confirm whether that user exists.
+  describe("ownership", () => {
+    it("throws NotFoundError when requesting another user's loans", async () => {
+      prismaMock.user.findUnique.mockResolvedValue(user1);
+      prismaMock.loan.findMany.mockResolvedValue([loan1] as unknown as Loan[]);
+
+      await expect(
+        LoanService.getLoansByUser("user-2", "user-1")
+      ).rejects.toThrow(NotFoundError);
+    });
+
+    it("does not query loans when requesting another user's loans", async () => {
+      await expect(
+        LoanService.getLoansByUser("user-2", "user-1")
+      ).rejects.toThrow(NotFoundError);
+
+      expect(prismaMock.user.findUnique).not.toHaveBeenCalled();
+      expect(prismaMock.loan.findMany).not.toHaveBeenCalled();
     });
   });
 });

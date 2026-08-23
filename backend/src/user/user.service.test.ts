@@ -2,9 +2,8 @@ import { describe, it, expect } from "vitest";
 import "../__mocks__/prisma";
 import { prismaMock } from "../__mocks__/prisma";
 import { UserService } from "./user.service";
-import { NotFoundError, ConflictError } from "../errors/AppError";
+import { NotFoundError } from "../errors/AppError";
 import { User, Role } from "../generated/prisma/client";
-import { Prisma } from "../generated/prisma/client";
 
 const mockUser: User = {
   id: "user-1",
@@ -38,10 +37,10 @@ describe("UserService", () => {
   });
 
   describe("getUserById", () => {
-    it("returns the user when found", async () => {
+    it("returns the user when requesting your own record", async () => {
       prismaMock.user.findUnique.mockResolvedValue(mockUser);
 
-      const result = await UserService.getUserById("user-1");
+      const result = await UserService.getUserById("user-1", "user-1");
 
       expect(result).toEqual(mockUser);
       expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
@@ -49,46 +48,24 @@ describe("UserService", () => {
       });
     });
 
-    it("throws NotFoundError when user does not exist", async () => {
+    it("throws NotFoundError when your own record does not exist", async () => {
       prismaMock.user.findUnique.mockResolvedValue(null);
 
-      await expect(UserService.getUserById("missing-id")).rejects.toThrow(NotFoundError);
-    });
-  });
-
-  describe("createUser", () => {
-    const input = {
-      email: "alice@cameraclub.fi",
-      name: "Alice Virtanen",
-      role: Role.MEMBER,
-    };
-
-    it("creates and returns the new user", async () => {
-      prismaMock.user.create.mockResolvedValue(mockUser);
-
-      const result = await UserService.createUser(input);
-
-      expect(result).toEqual(mockUser);
+      await expect(UserService.getUserById("user-1", "user-1")).rejects.toThrow(NotFoundError);
     });
 
-    it("calls prisma.user.create with the correct data payload", async () => {
-      prismaMock.user.create.mockResolvedValue(mockUser);
+    // Members may read only their own record. A foreign id gets NotFound rather
+    // than 403 so the response does not confirm whether that user exists.
+    it("throws NotFoundError when requesting another user's record", async () => {
+      prismaMock.user.findUnique.mockResolvedValue(mockUser);
 
-      await UserService.createUser(input);
-
-      expect(prismaMock.user.create).toHaveBeenCalledWith({
-        data: { ...input, id: expect.any(String), emailVerified: false },
-      });
+      await expect(UserService.getUserById("user-2", "user-1")).rejects.toThrow(NotFoundError);
     });
 
-    it("throws ConflictError when email already exists (P2002)", async () => {
-      const uniqueViolation = new Prisma.PrismaClientKnownRequestError(
-        "Unique constraint failed",
-        { code: "P2002", clientVersion: "7.0.0", meta: { target: ["email"] } }
-      );
-      prismaMock.user.create.mockRejectedValue(uniqueViolation);
+    it("does not query the database when requesting another user's record", async () => {
+      await expect(UserService.getUserById("user-2", "user-1")).rejects.toThrow(NotFoundError);
 
-      await expect(UserService.createUser(input)).rejects.toThrow(ConflictError);
+      expect(prismaMock.user.findUnique).not.toHaveBeenCalled();
     });
   });
 });

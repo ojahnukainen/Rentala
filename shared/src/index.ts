@@ -45,14 +45,9 @@ export const CreateGearSchema = z.object({
 export type CreateGearInput = z.infer<typeof CreateGearSchema>;
 
 // ── User schemas ──────────────────────────────────────────────────────────────
-
-export const CreateUserSchema = z.object({
-  email: z.email(),
-  name: z.string().min(1),
-  role: z.enum([Role.MEMBER, Role.ADMIN]),
-});
-
-export type CreateUserInput = z.infer<typeof CreateUserSchema>;
+// User creation is owned by better-auth (POST /api/auth/sign-up/email). The
+// former CreateUserSchema backed an unauthenticated POST /api/v1/users that
+// accepted `role: "ADMIN"` from the request body; both were removed.
 
 // ── Loan schemas ──────────────────────────────────────────────────────────────
 

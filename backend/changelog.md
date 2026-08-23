@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Security
+- `GET /api/v1/users` now requires an authenticated session — it previously returned every user's name, email, role and id to unauthenticated callers
+- `GET /api/v1/users/:id` now requires a session **and** is restricted to the requesting user's own record; `UserService.getUserById` takes a `requestingUserId` and throws `NotFoundError` (not 403) for a foreign id, so the response does not confirm whether that user exists. The ownership check runs before the query, so no lookup happens for foreign ids
+- `GET /api/v1/users/:id/loans` now requires a session **and** is restricted to the requesting user's own loans; `LoanService.getLoansByUser` takes a `requestingUserId` with the same NotFound-over-403 behaviour. It previously exposed any user's full loan history to unauthenticated callers
+- `POST /api/v1/gear` now requires an authenticated session; anyone could previously add inventory
+- `GET /api/v1/gear` and `GET /api/v1/gear/:id` deliberately remain public so members can browse the catalogue before signing in — covered by a regression test
+- OpenAPI: `401` responses registered on all four newly gated paths; the two `:id` paths document the own-record-only rule
+- Note: these gates close *anonymous* access only. Any authenticated member can still list the full user directory — closing that requires the ADMIN role gate, which is not yet implemented
+
+### Removed
+- `POST /api/v1/users` route, `UserController.createUser`, `UserService.createUser`, `backend/src/user/user.schema.ts`, and `CreateUserSchema`/`CreateUserInput` from `@rentala_project/shared` — the route was unauthenticated and accepted `role: "ADMIN"` straight from the request body, and the rows it created had no `Account`, so they could never log in. Signup is owned by better-auth at `POST /api/auth/sign-up/email`. A route test asserts the path now 404s, to guard against reintroduction
+
 ### Added
 - `GearClassification` enum (`EVENT`, `NON_EVENT`) added to Prisma; new `Gear.classification` column with `@default(EVENT)` migration backfills existing rows
 - `CreateGearSchema` in `@rentala_project/shared` now requires `classification`

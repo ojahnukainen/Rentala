@@ -5,7 +5,6 @@ import {
 } from "@asteasolutions/zod-to-openapi";
 import { z } from "zod";
 import { CreateGearSchema } from "../gear/gear.schema";
-import { CreateUserSchema } from "../user/user.schema";
 import { CreateLoanSchema, ProcessReturnSchema } from "../loan/loan.schema";
 
 extendZodWithOpenApi(z);
@@ -93,6 +92,13 @@ const LoanStatsResponseSchema = registry.register(
 const responses400 = {
   400: {
     description: "Validation error",
+    content: { "application/json": { schema: ErrorResponseSchema } },
+  },
+};
+
+const responses401 = {
+  401: {
+    description: "Unauthenticated",
     content: { "application/json": { schema: ErrorResponseSchema } },
   },
 };
@@ -236,6 +242,7 @@ registry.registerPath({
   path: "/api/v1/gear",
   tags: ["Gear"],
   summary: "Create a new gear item",
+  description: "Requires an authenticated session.",
   request: {
     body: {
       content: { "application/json": { schema: CreateGearSchema } },
@@ -247,6 +254,7 @@ registry.registerPath({
       content: { "application/json": { schema: GearResponseSchema } },
     },
     ...responses400,
+    ...responses401,
     ...responses409,
   },
 });
@@ -258,6 +266,7 @@ registry.registerPath({
   path: "/api/v1/users",
   tags: ["Users"],
   summary: "List all users",
+  description: "Requires an authenticated session.",
   responses: {
     200: {
       description: "Array of all users",
@@ -265,6 +274,7 @@ registry.registerPath({
         "application/json": { schema: z.array(UserResponseSchema) },
       },
     },
+    ...responses401,
   },
 });
 
@@ -273,6 +283,8 @@ registry.registerPath({
   path: "/api/v1/users/{id}",
   tags: ["Users"],
   summary: "Get a single user by ID",
+  description:
+    "Requires an authenticated session, and members may read only their own record. Requesting another user's id returns 404 rather than 403 so the response does not confirm whether that user exists.",
   request: {
     params: z.object({ id: z.string() }),
   },
@@ -281,6 +293,7 @@ registry.registerPath({
       description: "User",
       content: { "application/json": { schema: UserResponseSchema } },
     },
+    ...responses401,
     ...responses404,
   },
 });
@@ -290,6 +303,8 @@ registry.registerPath({
   path: "/api/v1/users/{id}/loans",
   tags: ["Users", "Loans"],
   summary: "Get all loans for a specific user",
+  description:
+    "Requires an authenticated session, and members may read only their own loans. Requesting another user's id returns 404 rather than 403 so the response does not confirm whether that user exists.",
   request: {
     params: z.object({ id: z.string() }),
   },
@@ -300,27 +315,8 @@ registry.registerPath({
         "application/json": { schema: z.array(LoanResponseSchema) },
       },
     },
+    ...responses401,
     ...responses404,
-  },
-});
-
-registry.registerPath({
-  method: "post",
-  path: "/api/v1/users",
-  tags: ["Users"],
-  summary: "Create a new user",
-  request: {
-    body: {
-      content: { "application/json": { schema: CreateUserSchema } },
-    },
-  },
-  responses: {
-    201: {
-      description: "Created user",
-      content: { "application/json": { schema: UserResponseSchema } },
-    },
-    ...responses400,
-    ...responses409,
   },
 });
 

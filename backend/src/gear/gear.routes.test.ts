@@ -1,16 +1,39 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import request from "supertest";
 import express from "express";
 import "../__mocks__/prisma";
 import { prismaMock } from "../__mocks__/prisma";
 import { gearRouter } from "./gear.routes";
 import { errorHandler } from "../middleware/errorHandler";
-import { Gear, GearClassification, GearStatus, Prisma } from "../generated/prisma/client";
+import { requireAuth } from "../middleware/requireAuth";
+import { AppError } from "../errors/AppError";
+import { Gear, GearClassification, GearStatus, Prisma, Role, User } from "../generated/prisma/client";
+
+// ─── Mock requireAuth ─────────────────────────────────────────────────────────
+// Only POST /gear is gated. The GET routes stay public so members can browse
+// the catalogue before signing in.
+
+vi.mock("../middleware/requireAuth", () => ({
+  requireAuth: vi.fn(),
+}));
 
 const app = express();
 app.use(express.json());
 app.use("/gear", gearRouter);
 app.use(errorHandler);
+
+const now = new Date();
+
+const mockUser: User = {
+  id: "user-1",
+  email: "alice@cameraclub.fi",
+  name: "Alice Virtanen",
+  role: Role.MEMBER,
+  emailVerified: true,
+  image: null,
+  createdAt: now,
+  updatedAt: now,
+};
 
 const mockGear: Gear = {
   id: "gear-1",
@@ -19,9 +42,23 @@ const mockGear: Gear = {
   category: "Camera Body",
   status: GearStatus.AVAILABLE,
   classification: GearClassification.EVENT,
-  createdAt: new Date(),
-  updatedAt: new Date(),
+  createdAt: now,
+  updatedAt: now,
 };
+
+// Reset to authenticated before each test
+beforeEach(() => {
+  vi.mocked(requireAuth).mockImplementation((req, _res, next) => {
+    req.user = mockUser;
+    next();
+  });
+});
+
+function unauthenticate() {
+  vi.mocked(requireAuth).mockImplementationOnce((_req, _res, next) => {
+    next(new AppError("Unauthorized", 401));
+  });
+}
 
 describe("GET /gear", () => {
   it("returns 200 with an array of gear", async () => {
@@ -32,6 +69,17 @@ describe("GET /gear", () => {
     expect(res.status).toBe(200);
     expect(res.body).toHaveLength(1);
     expect(res.body[0].id).toBe("gear-1");
+  });
+
+  // The gear list must stay reachable without a session — /gear has no route
+  // guard on the frontend and the checkout flow is what redirects to login.
+  it("stays public: does not run requireAuth", async () => {
+    prismaMock.gear.findMany.mockResolvedValue([mockGear]);
+
+    const res = await request(app).get("/gear");
+
+    expect(res.status).toBe(200);
+    expect(vi.mocked(requireAuth)).not.toHaveBeenCalled();
   });
 });
 
@@ -66,13 +114,22 @@ describe("POST /gear", () => {
     classification: "EVENT",
   };
 
-  it("returns 201 with the created gear object when body is valid", async () => {
+  it("returns 201 with the created gear object when authenticated and body is valid", async () => {
     prismaMock.gear.create.mockResolvedValue(mockGear);
 
     const res = await request(app).post("/gear").send(baseBody);
 
     expect(res.status).toBe(201);
     expect(res.body.id).toBe("gear-1");
+  });
+
+  it("returns 401 when the request is not authenticated", async () => {
+    unauthenticate();
+
+    const res = await request(app).post("/gear").send(baseBody);
+
+    expect(res.status).toBe(401);
+    expect(prismaMock.gear.create).not.toHaveBeenCalled();
   });
 
   it("returns 400 when name is missing", async () => {

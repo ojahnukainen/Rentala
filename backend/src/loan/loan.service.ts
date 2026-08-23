@@ -114,7 +114,14 @@ export const LoanService = {
     });
   },
 
-  async getLoansByUser(userId: string): Promise<LoanWithItemsAndGear[]> {
+  // Members may read only their own loans. A foreign id throws NotFoundError
+  // rather than a 403 so the response does not confirm whether that user
+  // exists. Checked before the query so no lookup happens for foreign ids.
+  async getLoansByUser(userId: string, requestingUserId: string): Promise<LoanWithItemsAndGear[]> {
+    if (userId !== requestingUserId) {
+      throw new NotFoundError(`User with id ${userId} not found`);
+    }
+
     const user = await prisma.user.findUnique({ where: { id: userId } });
 
     if (!user) {
