@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Security
+- `POST /api/v1/loans/returns` is now ownership-checked. `LoanService.processReturn` takes a `requestingUserId` and scopes its `loanItem.findMany` with `loan: { userId: requestingUserId }`, so items on another member's loan never come back and the existing length check rejects them as `NotFoundError` (not 403, so the response does not confirm whether that item id exists). Previously any authenticated member could return **or cancel** any other member's gear by passing arbitrary `loanItemIds` — resolves the finding at `CODEAUDIT.md:3`
+- The ownership scope lives in the query rather than in a loop over the results, so an extra id added to the batch cannot skip the check
+- OpenAPI: `401` registered on `POST /api/v1/loans`, `POST /api/v1/loans/:id/pickup` and `POST /api/v1/loans/returns`; the pickup and returns paths now document their own-records-only rule
 - `GET /api/v1/users` now requires an authenticated session — it previously returned every user's name, email, role and id to unauthenticated callers
 - `GET /api/v1/users/:id` now requires a session **and** is restricted to the requesting user's own record; `UserService.getUserById` takes a `requestingUserId` and throws `NotFoundError` (not 403) for a foreign id, so the response does not confirm whether that user exists. The ownership check runs before the query, so no lookup happens for foreign ids
 - `GET /api/v1/users/:id/loans` now requires a session **and** is restricted to the requesting user's own loans; `LoanService.getLoansByUser` takes a `requestingUserId` with the same NotFound-over-403 behaviour. It previously exposed any user's full loan history to unauthenticated callers

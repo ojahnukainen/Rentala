@@ -147,9 +147,14 @@ export const LoanService = {
     return { activeLoans };
   },
 
-  async processReturn(loanItemIds: string[]): Promise<ReturnResult> {
+  // Ownership is enforced inside the query rather than by looping over the
+  // results: items on another member's loan never come back, so the existing
+  // length check below rejects them as "not found". That means there is no way
+  // to slip an extra id into the batch that skips the check, and the response
+  // never confirms whether a foreign item id exists.
+  async processReturn(loanItemIds: string[], requestingUserId: string): Promise<ReturnResult> {
     const items = await prisma.loanItem.findMany({
-      where: { id: { in: loanItemIds } },
+      where: { id: { in: loanItemIds }, loan: { userId: requestingUserId } },
     });
 
     if (items.length !== loanItemIds.length) {

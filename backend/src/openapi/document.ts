@@ -346,7 +346,7 @@ registry.registerPath({
   tags: ["Loans"],
   summary: "Create a new loan (checkout)",
   description:
-    "Creates a loan for one or more gear items. userId is taken from the authenticated session. Availability is checked by date-range overlap — a currently rented item can still be booked if its existing loan ends before the requested period.",
+    "Creates a loan for one or more gear items. Requires an authenticated session; userId is taken from that session. Availability is checked by date-range overlap — a currently rented item can still be booked if its existing loan ends before the requested period.",
   request: {
     body: {
       content: { "application/json": { schema: CreateLoanSchema } },
@@ -358,6 +358,7 @@ registry.registerPath({
       content: { "application/json": { schema: LoanResponseSchema } },
     },
     ...responses400,
+    ...responses401,
     ...responses404,
     ...responses409,
   },
@@ -369,7 +370,7 @@ registry.registerPath({
   tags: ["Loans"],
   summary: "Pick up a loan (mark as borrowed)",
   description:
-    "Sets borrowedAt to the current timestamp and updates all gear items in the loan to RENTED status. Fails if the loan is already picked up.",
+    "Sets borrowedAt to the current timestamp and updates all gear items in the loan to RENTED status. Fails if the loan is already picked up. Requires an authenticated session, and members may pick up only their own loans — another member's loan id returns 404 rather than 403.",
   request: {
     params: z.object({ id: z.string() }),
   },
@@ -378,6 +379,7 @@ registry.registerPath({
       description: "Updated loan with borrowedAt set",
       content: { "application/json": { schema: LoanResponseSchema } },
     },
+    ...responses401,
     ...responses404,
     ...responses409,
   },
@@ -389,7 +391,7 @@ registry.registerPath({
   tags: ["Loans"],
   summary: "Return loan items (partial or full)",
   description:
-    "Marks specific LoanItems as RETURNED and sets the underlying gear back to AVAILABLE. Pass a subset of a loan's items for a partial return, or all items for a full return.",
+    "Marks specific LoanItems as RETURNED and sets the underlying gear back to AVAILABLE. Pass a subset of a loan's items for a partial return, or all items for a full return. Requires an authenticated session, and members may return only items on their own loans — an item belonging to another member returns 404 rather than 403, so the response does not confirm whether that item exists.",
   request: {
     body: {
       content: { "application/json": { schema: ProcessReturnSchema } },
@@ -401,6 +403,7 @@ registry.registerPath({
       content: { "application/json": { schema: ReturnResultSchema } },
     },
     ...responses400,
+    ...responses401,
     ...responses404,
     ...responses409,
   },

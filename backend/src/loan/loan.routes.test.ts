@@ -290,6 +290,33 @@ describe("POST /loans/returns", () => {
     expect(res.status).toBe(404);
   });
 
+  it("scopes the return to the authenticated user's own loans", async () => {
+    setupTransaction();
+    prismaMock.loanItem.findMany.mockResolvedValue([mockLoanItem]);
+    prismaMock.loanItem.updateMany.mockResolvedValue({ count: 1 });
+    prismaMock.gear.updateMany.mockResolvedValue({ count: 1 });
+
+    await request(app)
+      .post("/loans/returns")
+      .send({ loanItemIds: ["loan-item-1"] });
+
+    expect(prismaMock.loanItem.findMany).toHaveBeenCalledWith({
+      where: { id: { in: ["loan-item-1"] }, loan: { userId: "user-1" } },
+    });
+  });
+
+  it("returns 404 when the items belong to another member's loan", async () => {
+    // the ownership-scoped query returns nothing for a foreign item
+    prismaMock.loanItem.findMany.mockResolvedValue([]);
+
+    const res = await request(app)
+      .post("/loans/returns")
+      .send({ loanItemIds: ["someone-elses-item"] });
+
+    expect(res.status).toBe(404);
+    expect(prismaMock.loanItem.updateMany).not.toHaveBeenCalled();
+  });
+
   it("returns 409 when a loan item has already been returned", async () => {
     const alreadyReturned: LoanItem = {
       ...mockLoanItem,

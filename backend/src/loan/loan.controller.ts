@@ -24,7 +24,7 @@ export const LoanController = {
   async processReturn(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { loanItemIds } = req.body as ProcessReturnInput;
-      const result = await LoanService.processReturn(loanItemIds);
+      const result = await LoanService.processReturn(loanItemIds, req.user!.id);
       res.json(result);
     } catch (err) {
       next(err);
