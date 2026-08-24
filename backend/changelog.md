@@ -7,6 +7,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Security
+- Rate limiting enabled on `/api/auth/*` via better-auth's built-in limiter — no new dependency. `src/lib/rateLimit.ts` holds the config: `/sign-in/email` 5 per 60s, `/sign-up/email`, `/forget-password` and `/reset-password` 5 per hour, with a 60-per-60s global fallback for other auth routes. better-auth also applies its own built-in 3-per-10s rule to `/sign-in*`, `/sign-up*`, `/change-password*` and `/change-email*`
+- `rateLimit.enabled` is **not** left on better-auth's default of `NODE_ENV === "production"`. A host that does not set `NODE_ENV` would otherwise leave sign-in brute force unbounded while the config still looked enabled. It now defaults to on everywhere except `NODE_ENV=test` (the suite shares one client IP), overridable with `RATE_LIMIT_ENABLED`
+- Verified end-to-end: 5 sign-in attempts from one IP succeed with 401, the 6th returns 429; a second IP is unaffected, so the limiter keys per-IP rather than globally
+- Limits are per-IP, read from `x-forwarded-for`. Behind a proxy that does not set that header better-auth **skips** rate limiting rather than failing closed. Storage is in-memory, so budgets are per process
+- `/api-docs` is no longer served unconditionally. `src/middleware/apiDocs.ts` resolves a mode from the environment and **fails closed**: `API_DOCS_USER` + `API_DOCS_PASSWORD` serve it behind HTTP Basic auth, `API_DOCS_PUBLIC=true` serves it unprotected for local development, and anything else does not mount it at all. Half-configured credentials resolve to off rather than silently downgrading to public
+- The docs guard deliberately does not key off `NODE_ENV`, so a deployed host that forgets to set it cannot publish the API surface
+- Basic auth compares both halves of the credentials with `timingSafeEqual` over SHA-256 digests, and returns an identical 401 for every failure mode, so the response reveals neither timing nor which half was wrong
+- Startup now logs the resolved API-docs mode and whether auth rate limiting is on
 - `POST /api/v1/loans/returns` is now ownership-checked. `LoanService.processReturn` takes a `requestingUserId` and scopes its `loanItem.findMany` with `loan: { userId: requestingUserId }`, so items on another member's loan never come back and the existing length check rejects them as `NotFoundError` (not 403, so the response does not confirm whether that item id exists). Previously any authenticated member could return **or cancel** any other member's gear by passing arbitrary `loanItemIds` — resolves the finding at `CODEAUDIT.md:3`
 - The ownership scope lives in the query rather than in a loop over the results, so an extra id added to the batch cannot skip the check
 - OpenAPI: `401` registered on `POST /api/v1/loans`, `POST /api/v1/loans/:id/pickup` and `POST /api/v1/loans/returns`; the pickup and returns paths now document their own-records-only rule
@@ -20,6 +28,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Removed
 - `POST /api/v1/users` route, `UserController.createUser`, `UserService.createUser`, `backend/src/user/user.schema.ts`, and `CreateUserSchema`/`CreateUserInput` from `@rentala_project/shared` — the route was unauthenticated and accepted `role: "ADMIN"` straight from the request body, and the rows it created had no `Account`, so they could never log in. Signup is owned by better-auth at `POST /api/auth/sign-up/email`. A route test asserts the path now 404s, to guard against reintroduction
+
+### Changed
+- `src/openapi/document.ts` — replaced 11 deprecated `z.string().datetime()` calls with Zod 4's `z.iso.datetime()`. Verified no-op: the generated OpenAPI document was dumped before and after and is byte-identical, so `format: "date-time"` is unchanged for every field. No other deprecated Zod string-format calls remain in the codebase (the `z.coerce.date()` calls in `gear.schema.ts` and the shared package are current API, not deprecated)
 
 ### Added
 - `GearClassification` enum (`EVENT`, `NON_EVENT`) added to Prisma; new `Gear.classification` column with `@default(EVENT)` migration backfills existing rows

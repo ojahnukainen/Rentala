@@ -4,6 +4,8 @@ import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import { openApiDocument } from "./openapi/document";
 import { errorHandler } from "./middleware/errorHandler";
+import { apiDocsMode, basicAuth } from "./middleware/apiDocs";
+import { rateLimitEnabled } from "./lib/rateLimit";
 import { authHandler } from "./auth/auth.routes";
 import { gearRouter } from "./gear/gear.routes";
 import { userRouter } from "./user/user.routes";
@@ -31,7 +33,23 @@ app.get("/ping", (_req, res) => {
   res.json({ status: "ok" });
 });
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openApiDocument));
+// Swagger UI publishes the whole API surface, so it is mounted only when
+// explicitly configured. Unconfigured means not mounted at all — see
+// src/middleware/apiDocs.ts.
+const docsMode = apiDocsMode();
+const docsUser = process.env.API_DOCS_USER;
+const docsPassword = process.env.API_DOCS_PASSWORD;
+
+if (docsMode === "protected" && docsUser && docsPassword) {
+  app.use(
+    "/api-docs",
+    basicAuth(docsUser, docsPassword),
+    swaggerUi.serve,
+    swaggerUi.setup(openApiDocument)
+  );
+} else if (docsMode === "public") {
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openApiDocument));
+}
 
 app.use("/api/v1/gear", gearRouter);
 app.use("/api/v1/users", userRouter);
@@ -44,6 +62,8 @@ const PORT = process.env.PORT ?? 3000;
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+    console.log(`API docs: ${docsMode}`);
+    console.log(`Auth rate limiting: ${rateLimitEnabled() ? "on" : "off"}`);
   });
 }
 

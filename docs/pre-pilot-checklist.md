@@ -30,14 +30,18 @@ Every item cites where the evidence is. Verification status for each claim is in
 - [x] **Deleted `POST /api/v1/users`**
   Route, `UserController.createUser`, `UserService.createUser`, `user.schema.ts`, and `CreateUserSchema`/`CreateUserInput` from shared all removed. A route test asserts the path 404s, guarding against reintroduction.
 
-- [ ] **Add ownership check to `processReturn`** — `backend/src/loan/loan.service.ts:143`
-  Takes only `loanItemIds`; never checks who's asking. Any logged-in member can return or cancel any other member's gear. This is `CODEAUDIT.md:3`, still unfixed. Fix pattern already exists in `pickupLoan` (`loan.service.ts:87-89`): take `requestingUserId`, load the parent loan via the item's `loanId`, assert `loan.userId === requestingUserId`, throw `NotFoundError` (not 403 — don't confirm the id exists).
+- [x] **Add ownership check to `processReturn`** — *done 2026-08-23*
+  Took only `loanItemIds` and never checked who was asking, so any logged-in member could return or cancel any other member's gear. `processReturn` now takes a `requestingUserId` and scopes its `loanItem.findMany` with `loan: { userId: requestingUserId }` — foreign items never come back, and the existing length check rejects them as `NotFoundError` rather than 403. The scope lives in the query rather than a loop over results, so an extra id in the batch can't skip the check. 6 new tests.
+  ⚠️ The unit tests use a mocked Prisma, so they verify the *query we send*, not that the database honours it. Worth one manual two-account check against a real DB before the pilot.
 
-- [ ] **Rate-limit `/api/auth/*`** — `backend/src/index.ts:26`
-  Sign-in brute force is currently unbounded.
+- [x] **Rate-limit `/api/auth/*`** — *done 2026-08-23*
+  Used better-auth's built-in limiter, so no new dependency. Config in `src/lib/rateLimit.ts`: sign-in 5/60s, sign-up and password reset 5/hour, 60/60s global fallback. Critically, `enabled` no longer follows better-auth's `NODE_ENV === "production"` default — a host that doesn't set `NODE_ENV` would have left this silently off. **Verified end-to-end**: 6th sign-in attempt from one IP returns 429, a second IP is unaffected.
+  ⚠️ Keys off `x-forwarded-for`; behind a proxy that doesn't set it better-auth *skips* limiting rather than failing closed. Render does set it. Storage is in-memory, so budgets are per process — fine at one instance, worth revisiting if you scale out.
+  ⚠️ Only covers `/api/auth/*`. The `/api/v1/*` routes are still unlimited.
 
-- [ ] **Protect or disable `/api-docs` in staging** — `index.ts:34`
-  Swagger UI publicly documents the whole API surface, including the open endpoints above.
+- [x] **Protect or disable `/api-docs`** — *done 2026-08-23*
+  `src/middleware/apiDocs.ts` resolves a mode from the environment and fails closed: credentials → Basic auth; `API_DOCS_PUBLIC=true` → unprotected (local only); anything else → not mounted. Half-configured credentials resolve to off rather than downgrading to public. Deliberately independent of `NODE_ENV` so a host that forgets to set it can't publish the API surface. Verified: 404 unconfigured, 401 + `WWW-Authenticate` when protected, 200 with correct credentials.
+  **Action for staging:** set `API_DOCS_USER` and `API_DOCS_PASSWORD` on Render, or leave both unset to keep the docs off.
 
 ### Can't actually run the club
 
@@ -72,7 +76,9 @@ Every item cites where the evidence is. Verification status for each claim is in
   | `BETTER_AUTH_SECRET` | not read anywhere; **absent from README** | Sessions signed with a generated secret; every restart logs everyone out |
   | `FRONTEND_URL` | `index.ts:17`, `auth.ts:10` | CORS + trusted origins fall back to localhost only |
   | `SECURE_COOKIES` | `auth.ts:19-23` | Session cookies not `SameSite=None; Secure` — cross-origin auth silently fails between the two Render domains |
-  Add an `.env.example` and fail fast at boot on missing values.
+  | `API_DOCS_USER` / `API_DOCS_PASSWORD` | `middleware/apiDocs.ts` | Docs not mounted (safe default) — set both on staging if the team wants Swagger there |
+  | `RATE_LIMIT_ENABLED` | `lib/rateLimit.ts` | Defaults to on outside tests, so unset is safe — listed for completeness |
+  Add an `.env.example` and fail fast at boot on missing values. The README now documents all of these; `BETTER_AUTH_SECRET` is still the one with no safe default.
 
 - [ ] **Update the README** — `README.md:110-116`
   Still says "No admin interface" and "No role-based access control" and "No production deployment configuration" while an admin dashboard and a Render deploy pipeline both exist. Nobody but you can deploy this right now.

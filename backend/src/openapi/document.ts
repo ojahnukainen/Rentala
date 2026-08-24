@@ -36,8 +36,8 @@ const GearResponseSchema = registry.register(
       classification: z
         .enum(["EVENT", "NON_EVENT"])
         .openapi({ example: "EVENT" }),
-      createdAt: z.string().datetime(),
-      updatedAt: z.string().datetime(),
+      createdAt: z.iso.datetime(),
+      updatedAt: z.iso.datetime(),
     })
     .openapi("Gear")
 );
@@ -50,8 +50,8 @@ const UserResponseSchema = registry.register(
       email: z.string().openapi({ example: "alice@cameraclub.fi" }),
       name: z.string().openapi({ example: "Alice Virtanen" }),
       role: z.enum(["MEMBER", "ADMIN"]).openapi({ example: "MEMBER" }),
-      createdAt: z.string().datetime(),
-      updatedAt: z.string().datetime(),
+      createdAt: z.iso.datetime(),
+      updatedAt: z.iso.datetime(),
     })
     .openapi("User")
 );
@@ -62,11 +62,11 @@ const LoanResponseSchema = registry.register(
     .object({
       id: z.string().openapi({ example: "a1b2c3d4-..." }),
       userId: z.string().openapi({ example: "a1b2c3d4-..." }),
-      startDate: z.string().datetime().openapi({ description: "Booking period start" }),
-      borrowedAt: z.string().datetime().nullable().openapi({ description: "Actual pickup timestamp; null until picked up" }),
-      dueDate: z.string().datetime(),
-      createdAt: z.string().datetime(),
-      updatedAt: z.string().datetime(),
+      startDate: z.iso.datetime().openapi({ description: "Booking period start" }),
+      borrowedAt: z.iso.datetime().nullable().openapi({ description: "Actual pickup timestamp; null until picked up" }),
+      dueDate: z.iso.datetime(),
+      createdAt: z.iso.datetime(),
+      updatedAt: z.iso.datetime(),
     })
     .openapi("Loan")
 );
@@ -127,8 +127,8 @@ const AuthUserSchema = registry.register(
       email: z.string().openapi({ example: "alice@cameraclub.fi" }),
       name: z.string().openapi({ example: "Alice Virtanen" }),
       emailVerified: z.boolean(),
-      createdAt: z.string().datetime(),
-      updatedAt: z.string().datetime(),
+      createdAt: z.iso.datetime(),
+      updatedAt: z.iso.datetime(),
     })
     .openapi("AuthUser")
 );
