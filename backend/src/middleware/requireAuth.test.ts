@@ -21,6 +21,7 @@ const mockUser = {
   id: "user-1",
   email: "alice@cameraclub.fi",
   name: "Alice Virtanen",
+  role: "MEMBER",
   emailVerified: true,
   image: null as string | null,
   createdAt: new Date(),
@@ -85,6 +86,54 @@ describe("requireAuth middleware", () => {
       await requireAuth(req, {} as Response, makeNext());
 
       expect(auth.api.getSession).toHaveBeenCalledOnce();
+    });
+  });
+
+  // ── Role ──────────────────────────────────────────────────────────────────
+  // better-auth only puts `role` on the session user because auth.ts declares
+  // it as an additional field. If that config ever regresses, role arrives as
+  // undefined — which must fail closed rather than reach requireAdmin.
+
+  describe("role on the session user", () => {
+    it("carries the ADMIN role through to req.user", async () => {
+      vi.mocked(auth.api.getSession).mockResolvedValue({
+        ...mockSession,
+        user: { ...mockUser, role: "ADMIN" },
+      });
+      const req = makeReq();
+
+      await requireAuth(req, {} as Response, makeNext());
+
+      expect(req.user?.role).toBe("ADMIN");
+    });
+
+    it("passes a 401 AppError when the session user has no role", async () => {
+      const { role: _omit, ...userWithoutRole } = mockUser;
+      vi.mocked(auth.api.getSession).mockResolvedValue({
+        ...mockSession,
+        user: userWithoutRole,
+      } as unknown as typeof mockSession);
+      const req = makeReq();
+      const next = makeNext();
+
+      await requireAuth(req, {} as Response, next);
+
+      expect((vi.mocked(next).mock.calls[0][0] as unknown as AppError).statusCode).toBe(401);
+      expect(req.user).toBeUndefined();
+    });
+
+    it("passes a 401 AppError when the session user has an unknown role", async () => {
+      vi.mocked(auth.api.getSession).mockResolvedValue({
+        ...mockSession,
+        user: { ...mockUser, role: "SUPERUSER" },
+      });
+      const req = makeReq();
+      const next = makeNext();
+
+      await requireAuth(req, {} as Response, next);
+
+      expect((vi.mocked(next).mock.calls[0][0] as unknown as AppError).statusCode).toBe(401);
+      expect(req.user).toBeUndefined();
     });
   });
 

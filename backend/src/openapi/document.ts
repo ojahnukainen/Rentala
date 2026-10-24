@@ -103,6 +103,13 @@ const responses401 = {
   },
 };
 
+const responses403 = {
+  403: {
+    description: "Authenticated, but the user is not an ADMIN",
+    content: { "application/json": { schema: ErrorResponseSchema } },
+  },
+};
+
 const responses404 = {
   404: {
     description: "Not found",
@@ -242,7 +249,7 @@ registry.registerPath({
   path: "/api/v1/gear",
   tags: ["Gear"],
   summary: "Create a new gear item",
-  description: "Requires an authenticated session.",
+  description: "Requires an authenticated session with the ADMIN role.",
   request: {
     body: {
       content: { "application/json": { schema: CreateGearSchema } },
@@ -255,6 +262,7 @@ registry.registerPath({
     },
     ...responses400,
     ...responses401,
+    ...responses403,
     ...responses409,
   },
 });
@@ -266,7 +274,7 @@ registry.registerPath({
   path: "/api/v1/users",
   tags: ["Users"],
   summary: "List all users",
-  description: "Requires an authenticated session.",
+  description: "Requires an authenticated session with the ADMIN role.",
   responses: {
     200: {
       description: "Array of all users",
@@ -275,6 +283,7 @@ registry.registerPath({
       },
     },
     ...responses401,
+    ...responses403,
   },
 });
 
@@ -327,16 +336,15 @@ registry.registerPath({
   path: "/api/v1/loans/stats",
   tags: ["Loans"],
   summary: "Get aggregate loan statistics",
-  description: "Returns counts used by the admin dashboard.",
+  description:
+    "Returns counts used by the admin dashboard. Requires an authenticated session with the ADMIN role.",
   responses: {
     200: {
       description: "Aggregate stats",
       content: { "application/json": { schema: LoanStatsResponseSchema } },
     },
-    401: {
-      description: "Unauthenticated",
-      content: { "application/json": { schema: ErrorResponseSchema } },
-    },
+    ...responses401,
+    ...responses403,
   },
 });
 

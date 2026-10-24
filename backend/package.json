@@ -7,7 +7,8 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "test": "vitest"
+    "test": "vitest",
+    "promote-admin": "tsx src/scripts/promoteAdmin.ts"
   },
   "keywords": [],
   "author": "",

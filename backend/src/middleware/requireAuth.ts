@@ -2,7 +2,11 @@ import type { Request, Response, NextFunction } from "express";
 import { fromNodeHeaders } from "better-auth/node";
 import { auth } from "../lib/auth";
 import { AppError } from "../errors/AppError";
-import type { User } from "../generated/prisma/client";
+import { Role } from "../generated/prisma/client";
+
+function isRole(value: unknown): value is Role {
+  return Object.values(Role).includes(value as Role);
+}
 
 export async function requireAuth(
   req: Request,
@@ -17,6 +21,13 @@ export async function requireAuth(
     return next(new AppError("Unauthorized", 401));
   }
 
-  req.user = session.user as unknown as User;
+  // A session without a valid role means auth.ts no longer exposes it.
+  // Fail closed rather than let an undefined role reach requireAdmin.
+  const { role } = session.user;
+  if (!isRole(role)) {
+    return next(new AppError("Unauthorized", 401));
+  }
+
+  req.user = { ...session.user, role };
   next();
 }

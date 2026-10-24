@@ -62,7 +62,23 @@ Create `backend/.env`:
 ```env
 DATABASE_URL="postgresql://<user>:<password>@localhost:5432/<dbname>?schema=public"
 BETTER_AUTH_URL="http://localhost:3000"
+API_DOCS_PUBLIC="true"
 ```
+
+`API_DOCS_PUBLIC=true` serves Swagger UI at `/api-docs` without a password. **Local development only** — without it the docs are not mounted at all.
+
+### Optional / deployment environment
+
+| Var | Default | Purpose |
+|---|---|---|
+| `PORT` | `3000` | HTTP port |
+| `FRONTEND_URL` | — | Extra allowed CORS origin and better-auth trusted origin |
+| `SECURE_COOKIES` | `false` | Set `true` when frontend and backend are on different domains — issues `SameSite=None; Secure` session cookies |
+| `API_DOCS_USER` + `API_DOCS_PASSWORD` | — | Serve `/api-docs` behind HTTP Basic auth. **Both** are required; setting one alone leaves the docs unmounted |
+| `API_DOCS_PUBLIC` | — | `true` serves `/api-docs` with no password. Ignored when the credentials above are set |
+| `RATE_LIMIT_ENABLED` | on except under `NODE_ENV=test` | Force auth rate limiting on (`true`) or off (`false`) |
+
+Rate limiting on `/api/auth/*` keys off the `x-forwarded-for` header. Behind a proxy that does not set it, better-auth skips rate limiting rather than failing closed.
 
 ### 3. Run database migrations
 
@@ -89,6 +105,17 @@ npm run dev
 
 Frontend runs on `http://localhost:5173`.
 
+### 6. Create the first admin
+
+Sign-up always creates a `MEMBER` — a `role` in the sign-up body is ignored. To get an admin, sign up through the frontend, then promote that account:
+
+```bash
+# From monorepo root, against the DB in backend/.env
+npm run promote-admin -w backend -- you@example.com
+```
+
+On a deployed build (e.g. the Render shell): `node dist/scripts/promoteAdmin.js you@example.com`. The change applies to existing sessions on their next request.
+
 ---
 
 ## Key API Endpoints
@@ -98,11 +125,12 @@ Frontend runs on `http://localhost:5173`.
 | `POST` | `/api/auth/sign-up/email` | — | Register |
 | `POST` | `/api/auth/sign-in/email` | — | Sign in |
 | `GET` | `/api/v1/gear` | — | List all gear |
-| `POST` | `/api/v1/gear` | Required | Add a gear item |
+| `POST` | `/api/v1/gear` | Admin | Add a gear item |
 | `POST` | `/api/v1/loans` | Required | Create a reservation |
 | `POST` | `/api/v1/loans/:id/pickup` | Required | Mark loan as picked up |
 | `POST` | `/api/v1/loans/returns` | Required | Return items (full or partial) |
-| `GET` | `/api/v1/users` | Required | List all users |
+| `GET` | `/api/v1/users` | Admin | List all users |
+| `GET` | `/api/v1/loans/stats` | Admin | Dashboard loan counts |
 | `GET` | `/api/v1/users/:id/loans` | Required (own only) | Get loans for a user |
 
 Full spec available at `/api-docs`.
@@ -111,7 +139,6 @@ Full spec available at `/api-docs`.
 
 ## Known Limitations (MVP)
 
-- No admin interface — gear must be added directly via API
-- No role-based access control — all authenticated users have the same permissions
+- Two roles only (`MEMBER`, `ADMIN`); admins are promoted via the `promote-admin` script, not through the UI
 - No email verification or password reset
 - No production deployment configuration

@@ -1,10 +1,12 @@
 import { create } from 'zustand'
+import type { Role } from '@rentala_project/shared'
 import { api, ApiError } from '../lib/api'
 
 export interface AuthUser {
   id: string
   name: string
   email: string
+  role: Role
 }
 
 interface AuthStore {

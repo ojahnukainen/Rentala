@@ -7,6 +7,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Security
+- **Role-based access control.** `role` is now declared in better-auth's `user.additionalFields`, so it reaches `session.user` — the column alone was not enough, and it was previously `undefined` at runtime on every session (confirmed by probe against the dev DB)
+- `role` is declared with `input: false`, so `POST /api/auth/sign-up/email` ignores a `role` in the request body and always creates a `MEMBER`. Verified by an integration test, and that test was confirmed to fail when `input` is flipped to `true`
+- New `requireAdmin` middleware (`src/middleware/requireAdmin.ts`) — mounted after `requireAuth`; `403` for non-admins, `401` if no user is attached. Now gates `GET /api/v1/users`, `POST /api/v1/gear` and `GET /api/v1/loans/stats`. This closes member-to-member directory access noted below
+- `requireAuth` no longer casts `session.user as unknown as User` — that cast let `req.user.role` typecheck while being `undefined`. `req.user` is now `SessionUser` (`src/types/express.d.ts`): better-auth's inferred session user with `role` narrowed to `Role`. `requireAuth` validates the role and returns `401` if it is missing or unknown, so a config regression fails closed
+- Role changes take effect on the next request, including for existing sessions — better-auth reads the user row per request (no cookie cache configured)
+- OpenAPI: `403` registered on the three admin-gated paths
 - Rate limiting enabled on `/api/auth/*` via better-auth's built-in limiter — no new dependency. `src/lib/rateLimit.ts` holds the config: `/sign-in/email` 5 per 60s, `/sign-up/email`, `/forget-password` and `/reset-password` 5 per hour, with a 60-per-60s global fallback for other auth routes. better-auth also applies its own built-in 3-per-10s rule to `/sign-in*`, `/sign-up*`, `/change-password*` and `/change-email*`
 - `rateLimit.enabled` is **not** left on better-auth's default of `NODE_ENV === "production"`. A host that does not set `NODE_ENV` would otherwise leave sign-in brute force unbounded while the config still looked enabled. It now defaults to on everywhere except `NODE_ENV=test` (the suite shares one client IP), overridable with `RATE_LIMIT_ENABLED`
 - Verified end-to-end: 5 sign-in attempts from one IP succeed with 401, the 6th returns 429; a second IP is unaffected, so the limiter keys per-IP rather than globally
@@ -33,6 +39,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `src/openapi/document.ts` — replaced 11 deprecated `z.string().datetime()` calls with Zod 4's `z.iso.datetime()`. Verified no-op: the generated OpenAPI document was dumped before and after and is byte-identical, so `format: "date-time"` is unchanged for every field. No other deprecated Zod string-format calls remain in the codebase (the `z.coerce.date()` calls in `gear.schema.ts` and the shared package are current API, not deprecated)
 
 ### Added
+- `promote-admin` script (`src/scripts/promoteAdmin.ts`) — the admin bootstrap path. Since nobody can sign up as ADMIN, the first admin signs up normally and is promoted with `npm run promote-admin -w backend -- <email>` (or `node dist/scripts/promoteAdmin.js <email>` on a deployed build). Email is trimmed and lowercased; unknown email exits non-zero; already-admin is a no-op
+- Frontend: `AuthUser` carries `role`; the Admin nav link shows only for admins; `/admin` and `/admin/gear/new` show an admins-only message to members (UI only — the API is the real gate)
 - `GearClassification` enum (`EVENT`, `NON_EVENT`) added to Prisma; new `Gear.classification` column with `@default(EVENT)` migration backfills existing rows
 - `CreateGearSchema` in `@rentala_project/shared` now requires `classification`
 - `GearService.createGear` translates Prisma P2002 duplicate-serial errors into `ConflictError` (`409`)
@@ -98,4 +106,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `requireAuth` added to all three loan routes (`POST /api/v1/loans`, `POST /api/v1/loans/:id/pickup`, `POST /api/v1/loans/returns`); `userId` removed from `CreateLoanSchema` and `CreateLoanInput` — it is now read from `req.user.id` (set by `requireAuth`) in `LoanController.createLoan`
 - `cors` installed and configured in `src/index.ts`; allows origins `http://localhost:3000` and `http://localhost:5173` with `credentials: true` so Better Auth session cookies are accepted by the frontend
 - `src/lib/auth.ts` updated with `baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000"` to eliminate the base URL warning and support redirect/callback flows
-- `prisma/seed.ts` rewritten to create seed users via `auth.api.signUpEmail` — passwords are now properly hashed by Better Auth and `Account` records are created, so `alice@cameraclub.fi` and `bob@cameraclub.fi` (password: `password123`) can sign in from the frontend immediately after seeding; roles and `emailVerified` are set via a follow-up `prisma.user.update`
+- `prisma/seed.ts` rewritten to create seed users via `auth.api.signUpEmail` — passwords are now properly hashed by Better Auth and `Account` records are created, so `alice@cameraclub.fi` and `bob@cameraclub.fi` (password: `password123`) can sign in from the frontend immediately after seeding; roles and `emailVerified` are set via a follow-up `prisma.user.update` — **superseded:** seed users were removed in `897647a`; the seed now creates gear only. Use `promote-admin` to create the first admin

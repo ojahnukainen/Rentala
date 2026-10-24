@@ -20,6 +20,19 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+  // Declaring role here is what puts it on session.user — the column alone is
+  // not enough. input: false stops sign-up from accepting a role in the body;
+  // without it anyone could register as ADMIN. Promote via promote-admin.
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        required: false,
+        defaultValue: "MEMBER",
+        input: false,
+      },
+    },
+  },
   // Applies to /api/auth/* only; the /api/v1/* routes are not rate limited.
   // See src/lib/rateLimit.ts for why `enabled` does not follow NODE_ENV.
   rateLimit: {

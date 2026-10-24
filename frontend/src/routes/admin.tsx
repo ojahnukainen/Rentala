@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Role } from '@rentala_project/shared'
 import type { LoanStatsResponse } from '@rentala_project/shared'
 import { useAuthStore } from '../store/useAuthStore'
 import { api } from '../lib/api'
@@ -17,6 +18,8 @@ export const Route = createFileRoute('/admin')({
 function AdminPage() {
   const { user, loading: authLoading } = useAuthStore()
   const navigate = useNavigate()
+  // UI gate only — the API returns 403 to non-admins regardless.
+  const isAdmin = user?.role === Role.ADMIN
 
   const [users, setUsers] = useState<User[]>([])
   const [activeLoans, setActiveLoans] = useState<number | null>(null)
@@ -24,7 +27,7 @@ function AdminPage() {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
   useEffect(() => {
-    if (!user) return
+    if (!isAdmin) return
     let cancelled = false
     setLoading(true)
     Promise.allSettled([
@@ -41,7 +44,7 @@ function AdminPage() {
     return () => {
       cancelled = true
     }
-  }, [user?.id])
+  }, [user?.id, isAdmin])
 
   const totalUsers = users.length
   const visibleUsers = users.slice(0, visibleCount)
@@ -110,15 +113,19 @@ function AdminPage() {
           </p>
         )}
 
-        {!authLoading && user && loading && (
+        {!authLoading && user && !isAdmin && (
+          <p className={styles.stateMsg}>The admin dashboard is only available to club admins.</p>
+        )}
+
+        {!authLoading && isAdmin && loading && (
           <p className={styles.stateMsg}>Loading directory…</p>
         )}
 
-        {!authLoading && user && !loading && totalUsers === 0 && (
+        {!authLoading && isAdmin && !loading && totalUsers === 0 && (
           <p className={styles.stateMsg}>No users yet.</p>
         )}
 
-        {!authLoading && user && !loading && totalUsers > 0 && (
+        {!authLoading && isAdmin && !loading && totalUsers > 0 && (
           <>
             <div className={styles.userList}>
               {visibleUsers.map((u) => (

@@ -58,6 +58,31 @@ describe("Auth Routes", () => {
 
       expect(res.status).toBe(422);
     });
+
+    // role is declared with input: false in auth.ts. Without that, anyone
+    // could sign up as ADMIN by adding one field to the request body.
+    it("ignores a role sent in the sign-up body and creates a MEMBER", async () => {
+      await request(app)
+        .post("/api/auth/sign-up/email")
+        .send({ ...TEST_USER, role: "ADMIN" });
+
+      const user = await prisma.user.findUnique({ where: { email: TEST_USER.email } });
+      expect(user?.role).toBe("MEMBER");
+    });
+  });
+
+  // ── GET /api/auth/get-session ────────────────────────────────────────────
+
+  describe("GET /api/auth/get-session", () => {
+    it("includes the user's role on the session user", async () => {
+      const signUp = await request(app).post("/api/auth/sign-up/email").send(TEST_USER);
+      const cookie = signUp.headers["set-cookie"];
+
+      const res = await request(app).get("/api/auth/get-session").set("Cookie", cookie);
+
+      expect(res.status).toBe(200);
+      expect(res.body.user.role).toBe("MEMBER");
+    });
   });
 
   // ── POST /api/auth/sign-in/email ─────────────────────────────────────────

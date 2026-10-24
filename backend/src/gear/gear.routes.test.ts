@@ -54,6 +54,8 @@ beforeEach(() => {
   });
 });
 
+const mockAdmin: User = { ...mockUser, id: "admin-1", email: "admin@cameraclub.fi", role: Role.ADMIN };
+
 function unauthenticate() {
   vi.mocked(requireAuth).mockImplementationOnce((_req, _res, next) => {
     next(new AppError("Unauthorized", 401));
@@ -107,6 +109,13 @@ describe("GET /gear/:id", () => {
 });
 
 describe("POST /gear", () => {
+  beforeEach(() => {
+    vi.mocked(requireAuth).mockImplementation((req, _res, next) => {
+      req.user = mockAdmin;
+      next();
+    });
+  });
+
   const baseBody = {
     name: "Sony A7 IV",
     serialNumber: "SN-BODY-001",
@@ -129,6 +138,18 @@ describe("POST /gear", () => {
     const res = await request(app).post("/gear").send(baseBody);
 
     expect(res.status).toBe(401);
+    expect(prismaMock.gear.create).not.toHaveBeenCalled();
+  });
+
+  it("returns 403 for a member and does not create the gear", async () => {
+    vi.mocked(requireAuth).mockImplementationOnce((req, _res, next) => {
+      req.user = mockUser;
+      next();
+    });
+
+    const res = await request(app).post("/gear").send(baseBody);
+
+    expect(res.status).toBe(403);
     expect(prismaMock.gear.create).not.toHaveBeenCalled();
   });
 

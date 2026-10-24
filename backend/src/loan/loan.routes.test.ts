@@ -334,7 +334,7 @@ describe("POST /loans/returns", () => {
 });
 
 describe("GET /loans/stats", () => {
-  it("returns 200 with the active loans count for an authenticated user", async () => {
+  it("returns 200 with the active loans count for an admin", async () => {
     prismaMock.loan.count.mockResolvedValue(3);
 
     const res = await request(app).get("/loans/stats");
@@ -351,5 +351,17 @@ describe("GET /loans/stats", () => {
     const res = await request(app).get("/loans/stats");
 
     expect(res.status).toBe(401);
+  });
+
+  it("returns 403 for a member and does not query the database", async () => {
+    vi.mocked(requireAuth).mockImplementationOnce((req, _res, next) => {
+      req.user = { ...mockUser, role: Role.MEMBER };
+      next();
+    });
+
+    const res = await request(app).get("/loans/stats");
+
+    expect(res.status).toBe(403);
+    expect(prismaMock.loan.count).not.toHaveBeenCalled();
   });
 });

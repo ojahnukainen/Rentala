@@ -2,7 +2,16 @@
   "permissions": {
     "allow": [
       "Bash(npx tsc:*)",
-      "WebFetch(domain:www.better-auth.com)"
+      "WebFetch(domain:www.better-auth.com)",
+      "Bash(npm run *)",
+      "Bash(npx vitest *)",
+      "Bash(echo \"BACKEND TSC EXIT: $?\")",
+      "Bash(echo \"FRONTEND TSC EXIT: $?\")",
+      "Bash(rm -f ../backend/tsconfig.tsbuildinfo)"
     ]
+  },
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true,
+    "chrome-devtools-mcp@claude-plugins-official": true
   }
 }

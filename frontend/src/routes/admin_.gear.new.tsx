@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { CreateGearSchema, GearClassification } from '@rentala_project/shared'
+import { CreateGearSchema, GearClassification, Role } from '@rentala_project/shared'
 import type { GearClassification as GearClassificationType } from '@rentala_project/shared'
 import { api, ApiError } from '../lib/api'
 import type { Gear } from '../lib/types'
@@ -120,6 +120,15 @@ function AddGearPage() {
           </button>
           {' '}to add gear.
         </p>
+      </div>
+    )
+  }
+
+  // UI gate only — POST /api/v1/gear returns 403 to non-admins regardless.
+  if (user.role !== Role.ADMIN) {
+    return (
+      <div className={styles.page}>
+        <p className={styles.stateMsg}>Only club admins can add gear.</p>
       </div>
     )
   }

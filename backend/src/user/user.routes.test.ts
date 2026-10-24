@@ -59,6 +59,15 @@ beforeEach(() => {
   });
 });
 
+function authenticateAs(user: User) {
+  vi.mocked(requireAuth).mockImplementationOnce((req, _res, next) => {
+    req.user = user;
+    next();
+  });
+}
+
+const mockAdmin: User = { ...mockUser, id: "admin-1", email: "admin@cameraclub.fi", role: Role.ADMIN };
+
 function unauthenticate() {
   vi.mocked(requireAuth).mockImplementationOnce((_req, _res, next) => {
     next(new AppError("Unauthorized", 401));
@@ -68,7 +77,8 @@ function unauthenticate() {
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe("GET /users", () => {
-  it("returns 200 with an array of users when authenticated", async () => {
+  it("returns 200 with an array of users for an admin", async () => {
+    authenticateAs(mockAdmin);
     prismaMock.user.findMany.mockResolvedValue([mockUser]);
 
     const res = await request(app).get("/users");
@@ -84,6 +94,14 @@ describe("GET /users", () => {
     const res = await request(app).get("/users");
 
     expect(res.status).toBe(401);
+    expect(prismaMock.user.findMany).not.toHaveBeenCalled();
+  });
+
+  // The directory exposes every member's email — members must not see it.
+  it("returns 403 for a member and does not query the database", async () => {
+    const res = await request(app).get("/users");
+
+    expect(res.status).toBe(403);
     expect(prismaMock.user.findMany).not.toHaveBeenCalled();
   });
 });
